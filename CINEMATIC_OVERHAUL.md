@@ -45,6 +45,8 @@ Original VØRAX survivor-link mission HUD and Opportunity-only local archive con
 
 Executed: npm test 90/90 PASS; npm run build/typecheck PASS. Actual controls in Chrome 157 at 1440×900: solve PZ-00, physically walk to Opportunity, open PZ-02, inspect original image/credit/false-colour label, 18 Tab steps within dialog, pause/settings, 150% text with reduced intensity, return and solve PZ-02. Repeated against both development and production builds, zero runtime/console errors. Evidence: output/playwright/overhaul/interface/ and interface-production/ (screenshots and review.json). User has been shown the actual first console screenshot and asked for the second required visual approval. Wider rollout is pending that answer.
 
+Independent keyboard review reproduced an existing cinematic focus defect: Enter on Continue replaced the focused button, moving focus to BODY; Shift+Tab could then reach the canvas. Narrow correction retains Continue/Skip or panel focus across beat replacement, recovers Tab from outside the modal, and excludes disabled native controls. New normal-input tests/e2e/interface.spec.ts failed on the original production build and passed after rebuilding (1/1, 2.4 s); production build/typecheck and 90 unit tests also pass. Evidence: interface/focus-review.json and interface-focus-{before,after,build,unit}.log. This fix does not extend the pending visual design.
+
 ## Phases 4–5
 
 White rescue finale and final integrated QA remain pending. No phase is marked complete from a design plan or a mockup.

@@ -12,7 +12,7 @@ Continue from the saved master and this checkout. Recovery commits: `fe7c70b` (c
 - Runtime/source: `assets/blender/scripts/build_hands.py`, `audit_hand_camera.py`, `src/player/hands.ts`, `src/main.ts`, visual/provenance registries and new hand unit/browser tests. All science and gameplay guards unchanged. Prologue camera/clip synchronization changed for valid floor contact; mandatory interaction still has immediate E continuation and never waits on an animation callback.
 - Final Phase 2 validation: 90 unit tests, production build/typecheck, 15 browser tests PASS. Source/master reopened successfully. Human approved screenshots/demo. Hardware acceptance, Safari/Firefox, full human playthrough and comfort/contact review remain unverified.
 
-**Next:** first mission/Opportunity archive UI prototype, then show actual in-engine screenshot and verify readability for the second user visual checkpoint. Do not apply its design throughout the game until that approval. White rescue finale and integrated QA follow. Keep the completed r2/r3 station and Rescue One intact; never run build_station.py.
+**Next:** receive the second user visual approval of the implemented mission/Opportunity archive prototype (recoverable checkpoint `2a2e539`). Actual in-engine screenshot shown; original image/source labels, keyboard navigation, 150% text, reduced intensity and PZ-02 solution verified against development and production builds with no console errors. Other interfaces remain unchanged pending approval. Then widen the design, implement the white rescue finale and run integrated QA. Keep the completed r2/r3 station and Rescue One intact; never run build_station.py.
 
 ## Historical r3 handoff
 

@@ -103,12 +103,14 @@ export class GameUI {
         this.hintAction();
       }
       if (event.key === 'Tab') {
-        const items = Array.from(this.panel.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input, select, summary, [tabindex="0"]')).filter((e) => e.getClientRects().length > 0);
+        const items = Array.from(this.panel.querySelectorAll<HTMLElement>('button, a[href], input, select, summary, [tabindex="0"]')).filter((e) => !e.matches(':disabled') && e.getClientRects().length > 0);
         const first = items[0];
         const last = items[items.length - 1];
+        const active = document.activeElement;
         if (!first) { event.preventDefault(); this.panel.focus(); }
-        else if (event.shiftKey && (document.activeElement === first || document.activeElement === this.panel)) { event.preventDefault(); last?.focus(); }
-        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        else if (!this.panel.contains(active)) { event.preventDefault(); (event.shiftKey ? last : first)?.focus(); }
+        else if (event.shiftKey && (active === first || active === this.panel)) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
       }
     });
   }
@@ -547,6 +549,9 @@ export class GameUI {
     if (!current) return;
     const beat = current.beats[current.index];
     if (!beat) { this.skipCinematic(); return; }
+    const active = document.activeElement;
+    const retainedAction = active instanceof HTMLElement && this.panel.contains(active) ? active.dataset.cinematicAction : undefined;
+    const retainedPanelFocus = active === this.panel;
     this.root.dataset.cinematicBeat = String(current.index);
     this.panel.dataset.beat = String(current.index);
     this.panel.dataset.sequence = current.title;
@@ -556,8 +561,14 @@ export class GameUI {
     body.setAttribute('aria-live', 'polite');
     body.append(node('p', beat.speaker, 'layer'), node('p', beat.text, 'cinematic-line'));
     const actions = node('div', undefined, 'cinematic-actions');
-    actions.append(button('Continue', () => this.nextCinematicBeat(), 'primary'), button('Skip sequence', () => this.skipCinematic()));
+    const next = button('Continue', () => this.nextCinematicBeat(), 'primary');
+    const skip = button('Skip sequence', () => this.skipCinematic());
+    next.dataset.cinematicAction = 'continue'; skip.dataset.cinematicAction = 'skip';
+    actions.append(next, skip);
     this.panel.append(title, body, node('p', `${current.index + 1} / ${current.beats.length} · Fictional emergency and dialogue. NASA evidence remains in the archive.`, 'note'), actions);
+    // Replacing a focused button otherwise strands keyboard focus on <body>.
+    if (retainedAction) (retainedAction === 'skip' ? skip : next).focus({ preventScroll: true });
+    else if (retainedPanelFocus) this.panel.focus({ preventScroll: true });
     current.onBeat?.(beat, current.index);
     this.actions.onCinematicBeat?.(beat);
   }
