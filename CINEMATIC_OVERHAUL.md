@@ -39,6 +39,12 @@ Executed final checks: npm test 90/90 PASS, npm run build/typecheck PASS, final 
 Evidence: output/playwright/overhaul/hands/ (posed in-engine clip review), hands-gameplay/ (normal controls/UI screenshots), hands-demo/first-person-hands.webm (native canvas recording of actual first-person play; no external encoding dependency). Camera-only capture excludes HTML overlays; real UI screenshots are separate. Original twelve regression scenarios also passed before the last presentation tuning; final fifteen include that tuning.
 
 
-## Phases 3–5
+## Phase 3 — first interface prototype, awaiting visual approval
 
-Phase 3 first mission/Opportunity archive prototype is authorized after the approved hands checkpoint and passing Phase 2 checks. A second in-engine readability/visual approval is required before wider interface rollout. White rescue finale and final integrated QA remain pending. No phase is marked complete from a design plan or a mockup.
+Original VØRAX survivor-link mission HUD and Opportunity-only local archive console implemented after the hands approval. Cyan/amber technical framing, real ship-layout rail, recovery progress, evidence/restore navigation, 240 ms opening and 220 ms decorative closing. Reduced intensity and OS reduced-motion remove interface motion; 125–150% text stacks the scientific content and form. Existing record text, PIA05584 pixels, credits, provenance labels, source links, IDs and puzzle answers are unchanged. Other archives, journal and dialogue have not yet received the design.
+
+Executed: npm test 90/90 PASS; npm run build/typecheck PASS. Actual controls in Chrome 157 at 1440×900: solve PZ-00, physically walk to Opportunity, open PZ-02, inspect original image/credit/false-colour label, 18 Tab steps within dialog, pause/settings, 150% text with reduced intensity, return and solve PZ-02. Repeated against both development and production builds, zero runtime/console errors. Evidence: output/playwright/overhaul/interface/ and interface-production/ (screenshots and review.json). User has been shown the actual first console screenshot and asked for the second required visual approval. Wider rollout is pending that answer.
+
+## Phases 4–5
+
+White rescue finale and final integrated QA remain pending. No phase is marked complete from a design plan or a mockup.

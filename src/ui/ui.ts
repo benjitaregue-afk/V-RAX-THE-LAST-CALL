@@ -1,7 +1,8 @@
-// Provisional functional UI. Science and narrative are read from Claude's content,
-// never rendered as executable HTML. Final UI styling remains replaceable.
+// Science and narrative are read from reviewed content, never as executable HTML.
+// The first hybrid terminal prototype is scoped to Opportunity pending visual review.
 import type { GameState, PuzzleId, ScientificRecord } from '../game/contracts';
 import { stageIndex } from '../game/contracts';
+import { RECTS } from '../world/layout';
 import { project } from '../game/projection';
 import { PUZZLES, puzzleById } from '../content/puzzles';
 import { RECORDS, recordById } from '../content/records';
@@ -13,6 +14,7 @@ import type { ValidationResult } from '../puzzles/validate';
 import { STORY, SHIP_CONTEXT, SURVIVOR_PREMISE } from '../content/story';
 import type { SceneBeat } from '../content/story';
 import './style.css';
+import './terminal.css';
 
 export interface UIActions {
   getState(): GameState;
@@ -29,7 +31,7 @@ export interface UIActions {
   onCinematicBeat?(beat: SceneBeat): void;
 }
 
-const AI_DISCLOSURE = 'AI tools assisted with research notes, planning, code, in-game text and synthesized audio. The current 3D environment is a temporary technical greybox; final Blender production art is pending. NASA records and photographs are archival sources, not AI-generated observations.';
+const AI_DISCLOSURE = 'AI tools assisted with research notes, planning, code, in-game text, synthesized audio and original Blender environment and first-person hand art. Visual and artistic review is ongoing. NASA records and photographs are archival sources, not AI-generated observations.';
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, cls?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
   if (text !== undefined) e.textContent = text;
@@ -65,6 +67,10 @@ export class GameUI {
   private readonly captionBox = node('div', undefined, 'caption-box');
   private readonly toast = node('div', '', 'toast');
   private readonly hudBox = node('div', undefined, 'hud');
+  private readonly missionProgress = node('ol', undefined, 'mission-progress');
+  private readonly missionCount = node('span', '', 'mission-count');
+  private lastMissionStage = '';
+  private closingFrame: HTMLElement | null = null;
   private hintAction: (() => void) | null = null;
   private cinematic: { title: string; beats: SceneBeat[]; index: number; beatStart: number; elapsed: number; onDone: () => void; onBeat?: (beat: SceneBeat, index: number) => void } | null = null;
   private noticeTimer = 0;
@@ -76,14 +82,20 @@ export class GameUI {
     this.panel.tabIndex = -1;
     this.overlay.append(this.panel);
     const top = node('div', undefined, 'hud-top');
-    top.append(this.zone, this.objective);
+    const identity = node('div', undefined, 'hud-identity');
+    identity.append(node('span', 'VØRAX / SURVIVOR LINK'), node('span', 'LOCAL', 'hud-link-state'));
+    const location = node('div', undefined, 'hud-location');
+    location.append(this.zone, this.missionCount);
+    top.append(identity, location, node('p', 'ACTIVE OBJECTIVE', 'hud-objective-label'), this.objective, this.missionProgress);
+    this.missionProgress.setAttribute('aria-label', 'Ship recovery objectives');
     const controls = node('p', 'WASD move · Shift sprint · Mouse / arrows look · E inspect · F light · J journal · Esc pause', 'hud-controls');
-    const mark = node('span', 'TEMPORARY GREYBOX · AI-assisted fictional environment', 'build-mark');
+    const mark = node('span', 'AI-ASSISTED FICTIONAL ENVIRONMENT', 'build-mark');
     this.hudBox.append(top, node('div', '+', 'reticle'), this.interaction, controls, mark);
     this.captionBox.setAttribute('aria-live', 'polite');
     this.toast.setAttribute('role', 'status');
     root.replaceChildren(this.hudBox, this.captionBox, this.toast, this.overlay);
     this.overlay.hidden = true;
+    this.presentationSettings();
     document.addEventListener('keydown', (event) => {
       if (this.overlay.hidden) return;
       if (event.code === 'KeyH' && this.hintAction && !(event.target instanceof HTMLInputElement)) {
@@ -102,6 +114,11 @@ export class GameUI {
   }
 
   private show(title: string, layer?: string): HTMLElement {
+    this.presentationSettings();
+    this.closingFrame?.remove(); this.closingFrame = null;
+    this.overlay.classList.remove('terminal-overlay');
+    this.panel.classList.remove('terminal-panel');
+    delete this.panel.dataset.device;
     this.hintAction = null;
     this.cinematic = null;
     this.overlay.classList.remove('cinematic-overlay', 'ending-overlay');
@@ -124,6 +141,7 @@ export class GameUI {
   }
 
   hide(): void {
+    this.closeTerminalFrame();
     this.cinematic = null;
     delete this.panel.dataset.cinematic;
     delete this.panel.dataset.beat;
@@ -142,6 +160,48 @@ export class GameUI {
     if (this.objective.textContent !== objective) this.objective.textContent = objective;
     if (this.interaction.textContent !== interaction) this.interaction.textContent = interaction;
     if (this.zone.textContent !== zone) this.zone.textContent = zone;
+    this.presentationSettings();
+    const state = this.actions.getState();
+    if (state.storyStage !== this.lastMissionStage) {
+      this.lastMissionStage = state.storyStage;
+      const current = stageIndex(state.storyStage);
+      const steps = [
+        ['Power', 'ARCHIVE_OPEN'], ['Opportunity', 'OPPORTUNITY_RESTORED'],
+        ['InSight', 'INSIGHT_RESTORED'], ['Beacon', 'EPILOGUE'],
+      ] as const;
+      const complete = steps.filter(([, threshold]) => current >= stageIndex(threshold)).length;
+      this.missionCount.textContent = `${complete} / ${steps.length} RECOVERY`;
+      this.missionProgress.replaceChildren(...steps.map(([name, threshold], index) => {
+        const item = node('li', name);
+        const done = current >= stageIndex(threshold);
+        item.classList.toggle('complete', done);
+        if (!done && index === complete) item.setAttribute('aria-current', 'step');
+        item.setAttribute('aria-label', `${name}: ${done ? 'complete' : index === complete ? 'current objective' : 'pending'}`);
+        return item;
+      }));
+    }
+  }
+
+  private presentationSettings(): void {
+    const settings = this.actions.getSettings();
+    this.root.classList.toggle('reduced-intensity', settings.reducedIntensity);
+    this.root.classList.toggle('large-interface-text', settings.textScale >= 1.25);
+  }
+
+  private calmInterface(): boolean {
+    return this.actions.getSettings().reducedIntensity || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /** The closing shell is decorative; exploration and focus return immediately. */
+  private closeTerminalFrame(): void {
+    this.closingFrame?.remove(); this.closingFrame = null;
+    if (!this.overlay.classList.contains('terminal-overlay') || this.overlay.hidden || this.calmInterface()) return;
+    const rect = this.panel.getBoundingClientRect();
+    const frame = node('div', undefined, 'terminal-closing-frame');
+    frame.setAttribute('aria-hidden', 'true'); frame.inert = true;
+    Object.assign(frame.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
+    this.root.append(frame); this.closingFrame = frame;
+    window.setTimeout(() => { frame.remove(); if (this.closingFrame === frame) this.closingFrame = null; }, 240);
   }
 
   caption(text: string, layer = 'FICTIONAL ARCHIVE SYSTEM'): void {
@@ -166,7 +226,7 @@ export class GameUI {
   showMenu(hasSave: boolean, notice?: string): void {
     const p = this.show(TEXT.title, 'FICTIONAL SETTING · REAL MISSION RECORDS');
     p.append(node('h2', TEXT.subtitle), node('p', SURVIVOR_PREMISE), node('p', BEATS[0]!.caption));
-    p.append(node('p', 'Technical greybox build. All world geometry and lighting are provisional; final art will be replaced by Claude.', 'note'));
+    p.append(node('p', 'Production-art build. Visual polish and performance review are in progress.', 'note'));
     if (notice) p.append(node('p', notice, 'feedback'));
     const row = node('div', undefined, 'actions');
     row.append(button(hasSave ? 'Continue saved game' : TEXT.enter, () => this.actions.start(false), 'primary'));
@@ -203,6 +263,7 @@ export class GameUI {
     const update = (key: keyof Settings, value: unknown): void => {
       this.actions.updateSettings({ ...this.actions.getSettings(), [key]: value });
       this.root.style.setProperty('--text-scale', String(this.actions.getSettings().textScale));
+      this.presentationSettings();
     };
     const check = (key: 'reducedIntensity' | 'invertY', label: string): void => {
       const l = node('label', undefined, 'setting');
@@ -252,9 +313,15 @@ export class GameUI {
     if (def.recordIds.length) evidence.append(node('h2', 'Evidence library'));
     for (const recordId of def.recordIds) {
       const record = recordById(recordId);
-      const d = details(record.title, this.record(record));
-      d.addEventListener('toggle', () => { if (d.open) this.actions.recordViewed(record.id); });
-      evidence.append(d);
+      if (id === 'PZ-02' && recordId === 'R-PIA05584') {
+        const primary = this.record(record); primary.classList.add('terminal-primary-record');
+        evidence.append(primary);
+        this.actions.recordViewed(record.id);
+      } else {
+        const d = details(record.title, this.record(record));
+        d.addEventListener('toggle', () => { if (d.open) this.actions.recordViewed(record.id); });
+        evidence.append(d);
+      }
     }
     const form = node('form', undefined, 'puzzle-form');
     const answers: Record<string, string> = { ...(def.initial ?? {}) };
@@ -301,6 +368,73 @@ export class GameUI {
     if (id === 'PZ-03' && project(this.actions.getState()).canPreserve) form.append(button('Activate distress beacon', () => this.actions.preserve(), 'primary'), node('p', 'FICTIONAL SHIP SYSTEM: this opens the survivor channel in the story. No real spacecraft is contacted and no data is uploaded.', 'note'));
     form.append(button(TEXT.resume, () => this.actions.resume()));
     columns.append(evidence, form); p.append(columns);
+    if (id === 'PZ-02') this.opportunityTerminal(p, evidence, form, def.recordIds.length);
+  }
+
+  /** First device prototype: only the Opportunity restoration terminal is dressed. */
+  private opportunityTerminal(panel: HTMLElement, evidence: HTMLElement, form: HTMLElement, recordCount: number): void {
+    this.overlay.classList.add('terminal-overlay'); panel.classList.add('terminal-panel');
+    panel.dataset.device = 'opportunity-archive';
+    const title = panel.querySelector('h1')!;
+    const layer = panel.querySelector(':scope > .layer')!;
+    const header = node('header', undefined, 'terminal-header');
+    const identity = node('div', undefined, 'terminal-identity');
+    identity.append(node('span', 'VØRAX / LOCAL ARCHIVE'), node('span', 'EAST BAY · CONSOLE 02', 'terminal-serial'));
+    const heading = node('div', undefined, 'terminal-heading');
+    const titleBlock = node('div'); titleBlock.append(layer, title);
+    const state = node('div', undefined, 'terminal-state');
+    state.append(node('span', 'LOCAL COPY', 'terminal-state-light'), node('span', 'SOURCES AVAILABLE OFFLINE'));
+    heading.append(titleBlock, state);
+    const nav = node('nav', undefined, 'terminal-nav'); nav.setAttribute('aria-label', 'Archive terminal sections');
+    const jump = (target: HTMLElement): void => {
+      target.scrollIntoView({ behavior: this.calmInterface() ? 'auto' : 'smooth', block: 'start' });
+      target.focus({ preventScroll: true });
+    };
+    evidence.id = 'terminal-evidence'; evidence.tabIndex = -1; evidence.setAttribute('aria-label', 'Opportunity scientific evidence');
+    form.id = 'terminal-restoration'; form.tabIndex = -1; form.setAttribute('aria-label', 'Opportunity restoration choices');
+    nav.append(button('01 / Evidence', () => jump(evidence), 'terminal-section-link'), button('02 / Restore interpretation', () => jump(form), 'terminal-section-link'));
+    header.append(identity, heading, nav);
+    const brief = node('div', undefined, 'terminal-brief');
+    for (const item of Array.from(panel.children)) if (item.tagName === 'P') brief.append(item);
+    const mission = node('div', undefined, 'terminal-mission');
+    mission.append(node('span', 'ACTIVE SHIP OBJECTIVE', 'terminal-kicker'), node('p', project(this.actions.getState()).objective));
+    const rail = node('aside', undefined, 'terminal-rail');
+    rail.setAttribute('aria-label', 'Fictional terminal location and archive index');
+    rail.append(node('p', 'TERMINAL LOCATION', 'terminal-kicker'), node('h2', 'Opportunity'), node('p', 'EAST / WITNESS IN STONE', 'terminal-location'), this.stationMap());
+    const index = node('div', undefined, 'terminal-index');
+    index.append(node('p', 'ARCHIVE CONTENTS', 'terminal-kicker'), node('strong', `${String(recordCount).padStart(2, '0')} records`), node('p', 'Image · Instruments · Geological context · Mission catalog'));
+    const limits = node('div', undefined, 'terminal-index');
+    limits.append(node('p', 'INTERPRETATION', 'terminal-kicker'), node('p', 'Read the evidence. Separate appearance, composition and conclusion.'));
+    rail.append(index, limits, node('p', 'TAB focus / H hint / ESC pause', 'terminal-keyboard'));
+    const columns = panel.querySelector('.puzzle-columns')!;
+    const workspace = node('div', undefined, 'terminal-workspace'); workspace.append(rail, columns);
+    form.prepend(node('p', 'RESTORATION / EDUCATIONAL MODEL', 'terminal-kicker'), node('h2', 'Restore interpretation'));
+    const footer = node('footer', undefined, 'terminal-footer');
+    footer.append(node('span', 'FICTIONAL SHIP INTERFACE'), node('span', 'NASA evidence retains its source, credit and original image.'));
+    panel.replaceChildren(header, mission, brief, workspace, footer);
+  }
+
+  private stationMap(): HTMLElement {
+    const figure = node('figure', undefined, 'terminal-map');
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', '-16 -32 32 42'); svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'Fictional station layout. Opportunity is east of the hub.');
+    for (const rect of RECTS) {
+      const shape = document.createElementNS(ns, 'rect');
+      shape.setAttribute('x', String(rect.x0)); shape.setAttribute('y', String(-rect.z1));
+      shape.setAttribute('width', String(rect.x1 - rect.x0)); shape.setAttribute('height', String(rect.z1 - rect.z0));
+      shape.setAttribute('class', rect.zone === 'OPPORTUNITY' ? 'map-current' : rect.kind === 'connector' ? 'map-connector' : 'map-room');
+      svg.append(shape);
+      if (rect.kind === 'room') {
+        const text = document.createElementNS(ns, 'text');
+        text.setAttribute('x', String((rect.x0 + rect.x1) / 2)); text.setAttribute('y', String(-(rect.z0 + rect.z1) / 2));
+        text.textContent = ({ AIRLOCK: 'A0', HUB: 'HUB', OPPORTUNITY: 'OPP', INSIGHT: 'INS', RELAY: 'RELAY', OBSERVATION: 'DECK' } as const)[rect.zone];
+        svg.append(text);
+      }
+    }
+    figure.append(svg, node('figcaption', 'FICTIONAL SHIP LAYOUT'), node('p', '● East archive / current terminal', 'terminal-map-location'));
+    return figure;
   }
 
   private record(r: ScientificRecord): HTMLElement {
@@ -471,7 +605,7 @@ export class GameUI {
 
   private credits(): HTMLDetailsElement {
     const body = node('section');
-    body.append(node('p', TEXT.notOfficial), node('p', AI_DISCLOSURE), node('p', 'Technical foundation: Codex. Existing scientific content, narrative and Blender production script: Claude / project team. Final production models are not included in this greybox build. Babylon.js · TypeScript · Vite.'));
+    body.append(node('p', TEXT.notOfficial), node('p', AI_DISCLOSURE), node('p', 'Technical foundation and integration: Codex. Scientific content, narrative and earlier Blender production: project team and prior attributed contributors. Original Blender environment art and animated first-person hands are included. Artistic review is ongoing. Babylon.js · TypeScript · Vite.'));
     for (const source of Object.values(SOURCES)) body.append(link(`${source.id} — ${source.title} · ${source.publisher}`, source.url));
     body.append(node('h3', 'Image credits'), node('p', 'PIA05584 — NASA/JPL/Cornell. PIA25680 — NASA/JPL-Caltech. Credits, transformations and usage conditions are displayed with each record.'));
     return details('Sources, credits and AI disclosure', body);
