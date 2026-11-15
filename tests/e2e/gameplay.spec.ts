@@ -188,6 +188,9 @@ for(const calm of [false,true]) test(`survivor restores both missions and reache
     await page.reload();await page.getByRole('button',{name:'Continue saved game',exact:true}).click();
     await expect(page.locator('#scene')).toHaveAttribute('data-cinematic','rescue');
   }
+  // Check the five-second approach caption before screenshot capture can advance it.
+  await expect(page.locator('.cinematic-line')).toContainText('approaching spacecraft');
+  const spokenBeforeRadio=Number(await page.locator('#scene').getAttribute('data-spoken-lines'));
   await expect(page.locator('#scene')).toHaveAttribute('data-rescue-visible','true');
   await expect(page.locator('#scene')).toHaveAttribute('data-searchlight','true');
   const rescueBefore=Number(await page.locator('#scene').getAttribute('data-rescue-z'));
@@ -199,9 +202,7 @@ for(const calm of [false,true]) test(`survivor restores both missions and reache
   expect(Number(await page.locator('#scene').getAttribute('data-rescue-beam-end-z'))).toBeGreaterThanOrEqual(30.34);
   await page.screenshot({path:`${shots}/e2e-rescue-window.png`});
   await page.screenshot({path:`${finaleShots}/approach.png`});
-  await expect(page.locator('.cinematic-line')).toContainText('approaching spacecraft');
-  const spokenBeforeRadio=Number(await page.locator('#scene').getAttribute('data-spoken-lines'));
-  if(calm)await page.getByRole('button',{name:'Continue',exact:true}).click();
+  // Let the approach advance naturally; capture may already have reached the radio.
   await expect(page.locator('.cinematic-line')).toHaveText('Unidentified survivor aboard the vessel, this is Rescue One. We have visual confirmation. Hold your position.',{timeout:10000});
   // On this machine the headed run also verifies native speech's real onstart,
   // without substituting a mock voice. Captions remain required on every browser.

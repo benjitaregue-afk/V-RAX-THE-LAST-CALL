@@ -14,3 +14,10 @@ output/playwright/
 __pycache__/
 assets/blender/bake/
 assets/blender/backups/
+
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.DS_Store
