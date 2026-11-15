@@ -1,4 +1,104 @@
 {
+  "assets/env/airlock.hdr": {
+    "sha256": "f33b76e6bf18da6e3502371b46e46479832c147747e8c954a4ce07749bd4a385",
+    "bytes": 450245
+  },
+  "assets/env/hub.hdr": {
+    "sha256": "c3f489513d670e45795bbb35f0912524ec405f8b1263ac3281f670a1a0594074",
+    "bytes": 452938
+  },
+  "assets/env/insight.hdr": {
+    "sha256": "d8d9a9224a5b81e8e7bcccb5e5dc110937341e0d3c6db83efe90a8672e32976a",
+    "bytes": 442455
+  },
+  "assets/env/observation.hdr": {
+    "sha256": "db5ab1f0cdd465a90e5feacd1c965042ade13aefd669556a065854dcf11d22b3",
+    "bytes": 426795
+  },
+  "assets/env/opportunity.hdr": {
+    "sha256": "fb9b2b574831730d6af7d8daad6c74b144a88cdd1c21c6c41a82aa1d46bf0f13",
+    "bytes": 443536
+  },
+  "assets/env/relay.hdr": {
+    "sha256": "c84c01de0e16e5f251b2fc4339a94bc7a55624ea3f9dc626522fbae1ee567be5",
+    "bytes": 444656
+  },
+  "assets/lightmaps/airlock_e.jpg": {
+    "sha256": "7a5f1279f7cb6b23fb43c1fdbb36d59b547b4305b31cab5805dde0b1988b3a30",
+    "bytes": 146484
+  },
+  "assets/lightmaps/airlock_p.jpg": {
+    "sha256": "be0ac2c896d4b6b58441ccb9b3c23927d1ead4e025171e1dcd4c42e3b7f914c5",
+    "bytes": 206168
+  },
+  "assets/lightmaps/hub_e.jpg": {
+    "sha256": "7cf690bba931c1d0feffe766b3dfce64ab463e81b21cfa126743bb131c2c9626",
+    "bytes": 144726
+  },
+  "assets/lightmaps/hub_p.jpg": {
+    "sha256": "19fcb9e508088d7651528b25bcfd6a9d0cd964a738a0bd0dce73623488fbcb3b",
+    "bytes": 213117
+  },
+  "assets/lightmaps/insight_e.jpg": {
+    "sha256": "ddb9244000aff806ca8073b89c0d2ade85871ca2248dc9daf06b31cc2aaaf0af",
+    "bytes": 132889
+  },
+  "assets/lightmaps/insight_p.jpg": {
+    "sha256": "5ab7f40e1b1e1426c42572b48d567d48012671876d6cb9798e1c24b35009fa4f",
+    "bytes": 219379
+  },
+  "assets/lightmaps/observation_e.jpg": {
+    "sha256": "6c6f349b791da7757fabf4753f4630136d6f349376046835dc364769d02b0263",
+    "bytes": 159243
+  },
+  "assets/lightmaps/observation_p.jpg": {
+    "sha256": "26c292039bfb6cb3d51fef3abd7f719f319d3af2599500679b57df658fb4d831",
+    "bytes": 168240
+  },
+  "assets/lightmaps/opportunity_e.jpg": {
+    "sha256": "fedb9dde6872f779b103ecfeffaaa61d29ad0304a2f0497ed7a2e27cab58e985",
+    "bytes": 112797
+  },
+  "assets/lightmaps/opportunity_p.jpg": {
+    "sha256": "901ce671972a84147dc03fe4f8406d7723ccc356a10761427a624b962d5832fd",
+    "bytes": 223057
+  },
+  "assets/lightmaps/relay_e.jpg": {
+    "sha256": "fa1b4f934619f7eee9f9fb944ae81a1800d01e95d6ee4d6724e0fc2a30df7397",
+    "bytes": 111059
+  },
+  "assets/lightmaps/relay_p.jpg": {
+    "sha256": "df5c79243fe432b41c0e07a84a027333a5a960e645a235c108856ff5ad4971dd",
+    "bytes": 186728
+  },
+  "assets/models/arm.glb": {
+    "sha256": "3f6996197d4d40c1af3ec83221219d9200fbf9b96f83c42191a09824f76cbfac",
+    "bytes": 25084
+  },
+  "assets/models/door.glb": {
+    "sha256": "f271ab17729da2b8d28ba32e063bab5afa6a59c3d4c6824ac5809954026fd51c",
+    "bytes": 49584
+  },
+  "assets/models/empty.glb": {
+    "sha256": "967adbed246796b607297df239074829e8f768289833e3739550b0568ad7961b",
+    "bytes": 212
+  },
+  "assets/models/environment.glb": {
+    "sha256": "26e6e7472cc8d7592b296712b1e976d08fc8eabd504b43fa82054a5b12a57d16",
+    "bytes": 12930216
+  },
+  "assets/models/fan.glb": {
+    "sha256": "51a5ee04e75c7f16ea5d69fe6c190c13ef638a6bdbafa67a82679122f3065cc7",
+    "bytes": 16980
+  },
+  "assets/models/relay.glb": {
+    "sha256": "fb289f37836d3155e8d6a92ed75842f9c2c781ffa682ea9e1e29d4ffdb33031b",
+    "bytes": 73760
+  },
+  "assets/models/rescue-one.glb": {
+    "sha256": "0ee0786df3b80acc48bcba5b87ab7eb6383af277d1345180587ae3c8091f1d99",
+    "bytes": 471228
+  },
   "assets/nasa/insight-pia25680.jpg": {
     "sha256": "b7c6e8db9599c7b5955cabdbbcf8f7f8b1d8d608ca3642c820b7698463530fd2",
     "bytes": 273601

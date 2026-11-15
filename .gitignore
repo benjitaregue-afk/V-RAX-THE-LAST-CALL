@@ -9,3 +9,8 @@ playwright-report/
 # Local QA artifacts (retained on disk, not game assets)
 .playwright-cli/
 output/playwright/
+
+# Blender art pipeline: caches, regenerable bake masters and local scene backups
+__pycache__/
+assets/blender/bake/
+assets/blender/backups/

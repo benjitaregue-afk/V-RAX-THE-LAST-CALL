@@ -1,1 +1,18 @@
-{}
+{
+  "environment": "assets/models/environment.glb",
+  "door": "assets/models/door.glb",
+  "arm": "assets/models/arm.glb",
+  "fan": "assets/models/fan.glb",
+  "relay": "assets/models/relay.glb",
+  "terminal": "assets/models/empty.glb",
+  "switch": "assets/models/empty.glb",
+  "rack": "assets/models/empty.glb",
+  "pedestal": "assets/models/empty.glb",
+  "insight": "assets/models/empty.glb",
+  "opportunity": "assets/models/empty.glb",
+  "lamp": "assets/models/empty.glb",
+  "rib": "assets/models/empty.glb",
+  "crate": "assets/models/empty.glb",
+  "tray": "assets/models/empty.glb",
+  "rescue": "assets/models/rescue-one.glb"
+}

@@ -13,9 +13,12 @@ import type { ZoneId, DoorId } from '../game/contracts';
 import type { Settings } from '../save/save';
 import { VisualLibrary, readVisualManifest } from './visuals';
 import { ObservationRescue } from './rescue';
+import { ArtDirector } from './art';
 
 export class ArchiveWorld {
   readonly visuals: VisualLibrary;
+  /** Production art layer (Claude). Presentation only; inactive until real visuals load. */
+  readonly art: ArtDirector;
   readonly solids: Mesh[] = [];
   readonly rescue:ObservationRescue;
   private powerMultiplier=1;
@@ -34,6 +37,7 @@ export class ArchiveWorld {
     scene.fogMode = Scene.FOGMODE_LINEAR; scene.fogStart = 12; scene.fogEnd = 32;
     scene.fogColor = new Color3(0.03, 0.04, 0.05);
     this.visuals = new VisualLibrary(scene);
+    this.art = new ArtDirector(scene, this.visuals);
     const wall = this.material('PROVISIONAL-shell', '#39434D');
     const floor = this.material('PROVISIONAL-floor', '#27313A');
     for (const rect of RECTS) {
@@ -114,7 +118,7 @@ export class ArchiveWorld {
     const mesh=MeshBuilder.CreatePlane(id,{width:w,height:h},this.scene); mesh.position.set(x,y,z); mesh.rotation.y=yaw+Math.PI; mesh.material=material; mesh.isPickable=false;
   }
   async loadVisuals(warn:(text:string)=>void):Promise<void> {
-    try { await this.visuals.replace(await readVisualManifest(),warn); this.currentZone=null; this.setZone('AIRLOCK'); if(this.projection)this.sync(this.projection); }
+    try { await this.visuals.replace(await readVisualManifest(),warn); await this.art.finalize(); this.currentZone=null; this.setZone('AIRLOCK'); if(this.projection)this.sync(this.projection); }
     catch { warn('Visual configuration unavailable. Provisional geometry remains playable.'); }
   }
   sync(projection:WorldProjection):void {
@@ -124,6 +128,7 @@ export class ArchiveWorld {
       leaf.setEnabled(!open); this.visuals.setDoorOpen(`door-visual:${id}`,open); // Logical opening cannot depend on an animation callback.
     }
     for (const [id,pieces] of this.guides) for (const m of pieces) m.setEnabled(id===projection.guide);
+    this.art.sync(projection);
     this.applyLight();
   }
   configure(settings:Settings):void {
@@ -131,13 +136,14 @@ export class ArchiveWorld {
       this.shadow.dispose(); this.shadow=new ShadowGenerator(settings.quality==='low'?512:1024,this.accent);
       this.shadow.bias=0.002; this.shadow.normalBias=0.03; this.shadow.usePoissonSampling=true; this.currentZone=null;
     }
-    this.settings={...settings}; this.applyLight();
+    this.settings={...settings}; this.art.configure(settings); this.applyLight();
   }
   private applyLight():void {
     const brightness=this.settings?.brightness ?? 1;
     this.ambient.intensity=this.powerMultiplier*(this.projection?.lightProfile==='DARK'?0.30:0.48)*brightness;
     this.fill.intensity=1.2*brightness*this.powerMultiplier; this.accent.intensity=3*brightness*this.powerMultiplier;
     if (this.projection?.lightProfile==='PRESERVED') this.fill.diffuse=Color3.FromHexString('#D8C6A5');
+    if (this.art.active) this.art.light(this.powerMultiplier,this.ambient,this.fill,this.accent);
   }
   power(multiplier:number):void{this.powerMultiplier=multiplier;this.applyLight();}
   setZone(zone:ZoneId):void {
@@ -152,6 +158,7 @@ export class ArchiveWorld {
   }
   update(x:number,z:number,time:number,reduced:boolean):ZoneId {
     const zone=zoneAt(x,z) ?? 'AIRLOCK'; this.setZone(zone);
+    this.art.update(time,x,z,reduced);
     const arm=this.visuals.anchors.get('hub-arm');
     if (arm) arm.rotation.y=reduced ? 0 : Math.sin(time*0.15)*0.15;
     return zone;

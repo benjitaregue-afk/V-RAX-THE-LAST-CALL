@@ -104,13 +104,15 @@ describe('content integrity (QA A05)', () => {
   });
 
   it('respects the per-file and total download budgets', () => {
+    // Budgets were raised on 2026-11-14 for the cinematic art pass (baked lighting, textured shell).
     let total = 0;
     for (const a of ASSETS) {
       const bytes = statSync(join(publicDir, a.path)).size;
       total += bytes;
-      if (a.kind === 'image') expect(bytes, a.path).toBeLessThanOrEqual(1024 * 1024);
+      if (a.path.startsWith('assets/nasa/')) expect(bytes, a.path).toBeLessThanOrEqual(1024 * 1024);
+      else if (a.kind === 'image') expect(bytes, a.path).toBeLessThanOrEqual(1.5 * 1024 * 1024);
     }
-    expect(total).toBeLessThanOrEqual(6 * 1024 * 1024);
+    expect(total).toBeLessThanOrEqual(40 * 1024 * 1024);
   });
 
   it('keeps the unmodified NASA originals, and serves PIA05584 byte-identical', () => {

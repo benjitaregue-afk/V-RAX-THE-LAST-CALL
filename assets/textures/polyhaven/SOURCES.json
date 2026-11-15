@@ -1,0 +1,366 @@
+{
+  "retrievedAt": "2026-11-15",
+  "licensePage": "https://polyhaven.com/license",
+  "files": [
+    {
+      "asset": "blue_metal_plate",
+      "map": "Diffuse",
+      "file": "assets/textures/polyhaven/blue_metal_plate/blue_metal_plate_diff_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/blue_metal_plate/blue_metal_plate_diff_1k.jpg",
+      "page": "https://polyhaven.com/a/blue_metal_plate",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        2500,
+        2500
+      ],
+      "bytes": 395923,
+      "sha256": "a0162bffce47d4a35613a12af22571b28c18412dc5805cbb69eac343554ef750"
+    },
+    {
+      "asset": "blue_metal_plate",
+      "map": "nor_gl",
+      "file": "assets/textures/polyhaven/blue_metal_plate/blue_metal_plate_nor_gl_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/blue_metal_plate/blue_metal_plate_nor_gl_1k.jpg",
+      "page": "https://polyhaven.com/a/blue_metal_plate",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        2500,
+        2500
+      ],
+      "bytes": 238025,
+      "sha256": "970f0273c9e2e3b4fc8338bfd58a28c413b70ac4d1734d9dc8a136724bde56e6"
+    },
+    {
+      "asset": "blue_metal_plate",
+      "map": "arm",
+      "file": "assets/textures/polyhaven/blue_metal_plate/blue_metal_plate_arm_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/blue_metal_plate/blue_metal_plate_arm_1k.jpg",
+      "page": "https://polyhaven.com/a/blue_metal_plate",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        2500,
+        2500
+      ],
+      "bytes": 419910,
+      "sha256": "9321b539fe9cf0136ea04c3405b95ae82383f31c258b9c0e37ff8a1e577b637f"
+    },
+    {
+      "asset": "metal_plate",
+      "map": "Diffuse",
+      "file": "assets/textures/polyhaven/metal_plate/metal_plate_diff_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_diff_1k.jpg",
+      "page": "https://polyhaven.com/a/metal_plate",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        500,
+        500
+      ],
+      "bytes": 692234,
+      "sha256": "c6b6739eac2c75ccc898e753d7833df24eafbdb9aa92fb6eabfb92abd1a680a5"
+    },
+    {
+      "asset": "metal_plate",
+      "map": "nor_gl",
+      "file": "assets/textures/polyhaven/metal_plate/metal_plate_nor_gl_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_nor_gl_1k.jpg",
+      "page": "https://polyhaven.com/a/metal_plate",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        500,
+        500
+      ],
+      "bytes": 770307,
+      "sha256": "994f851a84d52b51e97906021a1b7070ee6eac9a789fef041132268de47d8e6b"
+    },
+    {
+      "asset": "metal_plate",
+      "map": "arm",
+      "file": "assets/textures/polyhaven/metal_plate/metal_plate_arm_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_arm_1k.jpg",
+      "page": "https://polyhaven.com/a/metal_plate",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        500,
+        500
+      ],
+      "bytes": 1004043,
+      "sha256": "fc4708b6700a2cc387654b693091dd0ac0cd1797ae803d75c894e62554fbef07"
+    },
+    {
+      "asset": "metal_grate_rusty",
+      "map": "Diffuse",
+      "file": "assets/textures/polyhaven/metal_grate_rusty/metal_grate_rusty_diff_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_grate_rusty/metal_grate_rusty_diff_1k.jpg",
+      "page": "https://polyhaven.com/a/metal_grate_rusty",
+      "authors": [
+        "Rob Tuytel",
+        "Dimitrios Savva"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        500,
+        500
+      ],
+      "bytes": 929481,
+      "sha256": "dc24176c7cdc8f526611fca206e852179b5fe2be157eea8a180ddd8985347df8"
+    },
+    {
+      "asset": "metal_grate_rusty",
+      "map": "nor_gl",
+      "file": "assets/textures/polyhaven/metal_grate_rusty/metal_grate_rusty_nor_gl_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_grate_rusty/metal_grate_rusty_nor_gl_1k.jpg",
+      "page": "https://polyhaven.com/a/metal_grate_rusty",
+      "authors": [
+        "Rob Tuytel",
+        "Dimitrios Savva"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        500,
+        500
+      ],
+      "bytes": 878053,
+      "sha256": "3bb15a5408a33b6291a7d6ded358c1426d4d3d166bd0ff43c14c4102e1638483"
+    },
+    {
+      "asset": "metal_grate_rusty",
+      "map": "arm",
+      "file": "assets/textures/polyhaven/metal_grate_rusty/metal_grate_rusty_arm_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_grate_rusty/metal_grate_rusty_arm_1k.jpg",
+      "page": "https://polyhaven.com/a/metal_grate_rusty",
+      "authors": [
+        "Rob Tuytel",
+        "Dimitrios Savva"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        500,
+        500
+      ],
+      "bytes": 966761,
+      "sha256": "d75ec65ba553a53faa8a16ba2a02dff1095d162f951d1ddd7566d4272ebf643b"
+    },
+    {
+      "asset": "rusty_metal_02",
+      "map": "Diffuse",
+      "file": "assets/textures/polyhaven/rusty_metal_02/rusty_metal_02_diff_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_diff_1k.jpg",
+      "page": "https://polyhaven.com/a/rusty_metal_02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        1000,
+        1000
+      ],
+      "bytes": 564932,
+      "sha256": "adaf094391518b6afe787a123942110aa88ef521c844f970b124420f5ed5d3d9"
+    },
+    {
+      "asset": "rusty_metal_02",
+      "map": "nor_gl",
+      "file": "assets/textures/polyhaven/rusty_metal_02/rusty_metal_02_nor_gl_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_nor_gl_1k.jpg",
+      "page": "https://polyhaven.com/a/rusty_metal_02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        1000,
+        1000
+      ],
+      "bytes": 403156,
+      "sha256": "995197a62cac6fbb000e6e6591a3330a3b77ef069c4ac58f505b586b9bdbd97b"
+    },
+    {
+      "asset": "rusty_metal_02",
+      "map": "arm",
+      "file": "assets/textures/polyhaven/rusty_metal_02/rusty_metal_02_arm_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_arm_1k.jpg",
+      "page": "https://polyhaven.com/a/rusty_metal_02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        1000,
+        1000
+      ],
+      "bytes": 153031,
+      "sha256": "2982943ffe3273a65bf788b77fc0c7a4fd8227824386d065d13a8c8c0e07db10"
+    },
+    {
+      "asset": "green_metal_rust",
+      "map": "Diffuse",
+      "file": "assets/textures/polyhaven/green_metal_rust/green_metal_rust_diff_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/green_metal_rust/green_metal_rust_diff_1k.jpg",
+      "page": "https://polyhaven.com/a/green_metal_rust",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        1000,
+        1000
+      ],
+      "bytes": 212088,
+      "sha256": "4509ab0cb1cf6bf9b9f970450a41f83ebd9bff178006deae568ff34b404856fc"
+    },
+    {
+      "asset": "green_metal_rust",
+      "map": "nor_gl",
+      "file": "assets/textures/polyhaven/green_metal_rust/green_metal_rust_nor_gl_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/green_metal_rust/green_metal_rust_nor_gl_1k.jpg",
+      "page": "https://polyhaven.com/a/green_metal_rust",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        1000,
+        1000
+      ],
+      "bytes": 121379,
+      "sha256": "8ecb28b0ea4026b740ce492e3f606f61a76bdce1f78cb2e29287bf9a56c54a80"
+    },
+    {
+      "asset": "green_metal_rust",
+      "map": "arm",
+      "file": "assets/textures/polyhaven/green_metal_rust/green_metal_rust_arm_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/green_metal_rust/green_metal_rust_arm_1k.jpg",
+      "page": "https://polyhaven.com/a/green_metal_rust",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        1000,
+        1000
+      ],
+      "bytes": 108674,
+      "sha256": "c1a48da0c5bba8f490497bbedadf4cb21d5387de8b3d49988c065e4b16805434"
+    },
+    {
+      "asset": "metal_plate_02",
+      "map": "Diffuse",
+      "file": "assets/textures/polyhaven/metal_plate_02/metal_plate_02_diff_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate_02/metal_plate_02_diff_1k.jpg",
+      "page": "https://polyhaven.com/a/metal_plate_02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        2000,
+        2000
+      ],
+      "bytes": 625917,
+      "sha256": "6e80877d0e9d5973d96298c6091df7ace906b0a6760afc4f3592e4855f3f1d4c"
+    },
+    {
+      "asset": "metal_plate_02",
+      "map": "nor_gl",
+      "file": "assets/textures/polyhaven/metal_plate_02/metal_plate_02_nor_gl_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate_02/metal_plate_02_nor_gl_1k.jpg",
+      "page": "https://polyhaven.com/a/metal_plate_02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        2000,
+        2000
+      ],
+      "bytes": 183264,
+      "sha256": "58736fbb8aa4fc6690cf8152b174db65caf22a766375b625fb0087e1bc955bc7"
+    },
+    {
+      "asset": "metal_plate_02",
+      "map": "arm",
+      "file": "assets/textures/polyhaven/metal_plate_02/metal_plate_02_arm_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate_02/metal_plate_02_arm_1k.jpg",
+      "page": "https://polyhaven.com/a/metal_plate_02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        2000,
+        2000
+      ],
+      "bytes": 1075839,
+      "sha256": "e099a8385d53f4a515b7e0ce94f85d88657fcac49c23979474f5394b22dd550b"
+    },
+    {
+      "asset": "container_side",
+      "map": "Diffuse",
+      "file": "assets/textures/polyhaven/container_side/container_side_diff_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/container_side/container_side_diff_1k.jpg",
+      "page": "https://polyhaven.com/a/container_side",
+      "authors": [
+        "Dimitrios Savva"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        1940.000057220459,
+        1939.9999380111694
+      ],
+      "bytes": 667470,
+      "sha256": "9d6a8a9a243b6111f9d13af12d90325f0f1d52e45c2e1731f2d496702f024452"
+    },
+    {
+      "asset": "container_side",
+      "map": "nor_gl",
+      "file": "assets/textures/polyhaven/container_side/container_side_nor_gl_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/container_side/container_side_nor_gl_1k.jpg",
+      "page": "https://polyhaven.com/a/container_side",
+      "authors": [
+        "Dimitrios Savva"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        1940.000057220459,
+        1939.9999380111694
+      ],
+      "bytes": 538519,
+      "sha256": "1e9e54d5816c97e5abeb448c3468b1eafb4add9acb41fcdc26817563c8f21f22"
+    },
+    {
+      "asset": "container_side",
+      "map": "arm",
+      "file": "assets/textures/polyhaven/container_side/container_side_arm_1k.jpg",
+      "downloadUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/container_side/container_side_arm_1k.jpg",
+      "page": "https://polyhaven.com/a/container_side",
+      "authors": [
+        "Dimitrios Savva"
+      ],
+      "license": "CC0 1.0 (Poly Haven asset licence)",
+      "realWorldSizeMm": [
+        1940.000057220459,
+        1939.9999380111694
+      ],
+      "bytes": 387982,
+      "sha256": "c5238fd9c6d234b1c6c9a62e2b1b97343636a4e42abd429e03faf58a613318b7"
+    }
+  ]
+}

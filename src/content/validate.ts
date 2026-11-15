@@ -115,7 +115,8 @@ export function validateContent(): string[] {
       if (!a[key].trim()) problems.push(`${at}: missing ${key}`);
     }
     if (a.transforms.length === 0) problems.push(`${at}: transforms must be stated, even when there are none`);
-    if (a.kind === 'image' && a.aiAssisted) problems.push(`${at}: NASA evidence is never marked as AI-assisted`);
+    if (a.path.startsWith('assets/nasa/') && a.aiAssisted) problems.push(`${at}: NASA evidence is never marked as AI-assisted`);
+    if (a.path.startsWith('assets/nasa/') !== a.credit.includes('NASA')) problems.push(`${at}: NASA credit belongs to NASA files only`);
   }
 
   return problems;

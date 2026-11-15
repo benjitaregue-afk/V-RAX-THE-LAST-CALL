@@ -65,3 +65,9 @@ Falta de origen o permiso, formato que requiere un servicio remoto, peso que rom
 ## Ampliación narrativa provisional — 2026-11-14
 
 No se generaron archivos de arte final. Se añadieron en código un rig de manos temporal, paneles dañados, estrellas, ventanal y nave/foco de rescate ficticios. Los assets finales de Claude se activan por slots `hands` y `rescue`; véase CLAUDE_HANDOFF. Registrar crédito, licencia y hash antes de admitir archivos reales. La voz provisional es la del navegador cuando está disponible; no es audio de NASA ni una interpretación final grabada.
+
+## Entrega artística r3 — 2026-11-15
+
+Hito de profundidad exterior completado sobre la estación r2 existente. Fuente editable: `assets/blender/vorax_station.blend`; script no destructivo: `assets/blender/scripts/station_exterior.py`. Se añaden 2.396 triángulos y dos materiales para una pluma de servicio, radiador y borde de casco, con mallas repetidas enlazadas. Entrega dentro de `public/assets/models/environment.glb` (12.930.216 bytes); SHA-256 `26e6e7472cc8d7592b296712b1e976d08fc8eabd504b43fa82054a5b12a57d16`. Crédito de r3: VØRAX team — exterior authored in Blender 5.3 through Blender MCP with Codex assistance. La autoría anterior se conserva en `src/content/assets.ts`; no se invocó Claude en esta sesión.
+
+Se reutilizan los mapas de metal ya acreditados en `assets/textures/polyhaven/SOURCES.json`, con UV proyectadas de 2 m, color por vértice, exportación GLB Y-up y texturas WebP embebidas. No hubo nuevas adquisiciones. Los 110 grupos de geometría interior y las 24 imágenes embebidas originales se conservan idénticos; los otros 26 assets servidos conservan sus hashes. Licencia del arte original: MIT propuesta, todavía sin adopción; las fuentes Poly Haven conservan CC0. Pruebas y límites de la entrega: `ART_HANDOFF.md`, informe geométrico `assets/blender/exterior-report.json`. El rig de manos sigue pendiente.

@@ -1,0 +1,256 @@
+{
+  "revision": "r3_exterior",
+  "budget_triangles": 4000,
+  "objects": [
+    {
+      "name": "SM_EXT_ServiceBoom",
+      "triangles": 1020,
+      "materials": 2,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 40,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_ServiceCover_01",
+      "triangles": 136,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_ServiceCover_02",
+      "triangles": 136,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_ServiceCover_03",
+      "triangles": 136,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_ServiceCover_04",
+      "triangles": 136,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_ServiceCover_05",
+      "triangles": 136,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_ServiceCover_06",
+      "triangles": 136,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_RadiatorBlade_01",
+      "triangles": 80,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_RadiatorBlade_02",
+      "triangles": 80,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_RadiatorBlade_03",
+      "triangles": 80,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_RadiatorBlade_04",
+      "triangles": 80,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_RadiatorBlade_05",
+      "triangles": 80,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_RadiatorBlade_06",
+      "triangles": 80,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SM_EXT_RadiatorBlade_07",
+      "triangles": 80,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_faces": 0,
+      "duplicate_vertices": 0,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "issues": [],
+  "triangles": 2396,
+  "materials": [
+    "MAT_Exterior_Hull",
+    "MAT_Exterior_Marker"
+  ],
+  "unique_meshes": 3,
+  "contact_vertices": "40 coincident vertices at contacts between separate closed truss members; intentionally not welded into non-manifold junctions.",
+  "uv_policy": "2 m tiled projected UVs; intentional repeats. No lightmap atlas, no packing target.",
+  "lod_policy": "Sparse secondary scenery, not a hero asset; under 4k total tris, linked repeats, no extra LOD.",
+  "naming_policy": "SM_EXT_ objects, MAT_Exterior_ materials; dedicated EXTERIOR collection.",
+  "pass": true
+}
