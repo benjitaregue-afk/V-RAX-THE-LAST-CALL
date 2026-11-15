@@ -12,9 +12,9 @@ Continue from the saved master and this checkout. Recovery commits: `fe7c70b` (c
 - Runtime/source: `assets/blender/scripts/build_hands.py`, `audit_hand_camera.py`, `src/player/hands.ts`, `src/main.ts`, visual/provenance registries and new hand unit/browser tests. All science and gameplay guards unchanged. Prologue camera/clip synchronization changed for valid floor contact; mandatory interaction still has immediate E continuation and never waits on an animation callback.
 - Final Phase 2 validation: 90 unit tests, production build/typecheck, 15 browser tests PASS. Source/master reopened successfully. Human approved screenshots/demo. Hardware acceptance, Safari/Firefox, full human playthrough and comfort/contact review remain unverified.
 
-**Current UI checkpoint:** the user REJECTED the first dashboard-like archive design (`be5e342` preserves it). Only Witness in Stone/PZ-02 is being redesigned as an original translucent optical projection, based on the new 06:55/06:56 external references. See `CINEMATIC_OVERHAUL.md` for actual screenshots, tests and limitations. Science, puzzle logic, Blender sources and GLBs are unchanged in this UI revision.
+**Current UI checkpoint:** the user APPROVED the revised Witness in Stone optical projection, answering “Aprobar esta dirección” on 2026-11-15. `42edfe0` preserves the approved prototype and its 90 unit / 16 browser passing checks. The earlier dashboard design (`be5e342`) remains rejected. See `CINEMATIC_OVERHAUL.md` for actual screenshots, tests and limitations. Science, puzzle logic, Blender sources and GLBs are unchanged in this UI revision.
 
-**Next:** show the revised real in-game PZ-02 projection and STOP for visual approval. Do not extend it to journal, objectives, mission UI or any other terminal until approved. White rescue finale remains pending. Keep the completed r2/r3 station and Rescue One intact; never run build_station.py.
+**Next:** extend the approved optical language to the remaining records, terminals, journal, mission information and dialogue; test that phase before implementing the white rescue finale and final integrated QA. No repeat visual approval gate is required for the already approved direction. Keep the completed r2/r3 station and Rescue One intact; never run build_station.py.
 
 ## Historical r3 handoff
 

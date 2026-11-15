@@ -65,6 +65,10 @@ Final production candidate: npm test 90/90 PASS; npm run build/typecheck PASS; n
 
 The result uses carefully bounded screen-space perspective rather than a world-anchored mesh. Compared with the references, the inclination and optical disturbance are deliberately shallower so long scientific text remains stable. Images remain unmodified and controls remain semantic HTML. No Blender source, GLB, NASA asset, scientific content, reducer, puzzle validator or world geometry changed. No new project dependency, remote font or acquired art asset was introduced. Human visual approval, comfort and Safari/Firefox remain unverified. Visual approval is pending: STOP here; do not extend to journal, mission UI or other terminals, or continue the finale before the required review.
 
+## Approved continuation — 2026-11-15
+
+The user answered “Aprobar esta dirección” to the optical projection visual checkpoint. Approval covers continuation of this direction. Recovery checkpoint `42edfe0` preserves the approved PZ-02 implementation and executed checks. Continue the original sequential overhaul: extend Phase 3, test it, implement the white rescue finale, then integrated QA. Do not rebuild completed environments or change science/puzzle logic. The earlier STOP language above records the fulfilled checkpoint, not a continuing gate.
+
 ## Phases 4–5
 
 White rescue finale and final integrated QA remain pending. No phase is marked complete from a design plan or a mockup.
