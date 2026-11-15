@@ -1,0 +1,251 @@
+/* Witness in Stone only. Optical layers are original code, never archival pixels. */
+.hologram-overlay {
+  padding: 7vh 7vw;
+  perspective: 1500px;
+  perspective-origin: 52% 48%;
+  background: radial-gradient(ellipse at 55% 50%, transparent 35%, #00000030 100%);
+  isolation: isolate;
+}
+#ui:has(.hologram-overlay:not([hidden])) .hud { visibility: hidden; }
+.hologram-panel {
+  --holo-line: #99d2e66b;
+  --holo-bright: #c2edfa;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1120px, 100%);
+  height: min(720px, 83dvh);
+  max-height: none;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #e2edf1;
+  font-family: 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1em;
+  line-height: 1.5;
+  transform: rotateY(-3deg) rotateX(.6deg) rotateZ(-.55deg);
+  transform-origin: 65% 50%;
+  animation: holo-deploy 420ms cubic-bezier(.16,.7,.25,1) both;
+}
+/* A second sheet and offset perimeter give the projection a physical thickness. */
+.hologram-panel::before,
+.hologram-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  clip-path: polygon(16px 0,calc(100% - 28px) 0,100% 24px,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 16px);
+}
+.hologram-panel::before {
+  background: linear-gradient(112deg,#1c252cce,#17232bc9 57%,#24323baf);
+  border: 1px solid var(--holo-line);
+  box-shadow: inset 0 0 40px #b4e8ff08, inset 0 0 1px 1px #beeaff33;
+  backdrop-filter: blur(1px);
+}
+.hologram-panel::after {
+  inset: -7px -8px -8px -8px;
+  border: 1px solid #8ecadd45;
+  background: linear-gradient(90deg,#b8edff14,transparent 15% 85%,#a6dded10);
+  box-shadow: 0 0 22px #66cbed16;
+  z-index: -2;
+}
+.hologram-panel:focus,
+.hologram-panel:focus-visible { outline: none; }
+.hologram-panel :is(button,a,input,summary):focus-visible {
+  outline: 2px solid #c0edff;
+  outline-offset: 3px;
+  box-shadow: 0 0 13px #a3ddff35;
+}
+.hologram-panel :is(button,a,summary) { -webkit-tap-highlight-color: transparent; }
+.hologram-panel button {
+  margin: 0;
+  min-height: 40px;
+  padding: 7px 14px;
+  border: 1px solid #a6deed55;
+  background: #9acddd0a;
+  color: #dfedf3;
+  font: inherit;
+  border-radius: 0;
+  transition: background-color 160ms, border-color 160ms;
+}
+.hologram-panel button:hover { background: #b2e7ff18; border-color: #bceaffbb; }
+.hologram-panel button.primary { background: #9edff221; border-color: #b3e7f6aa; }
+.hologram-panel button:disabled { opacity: .65; }
+.hologram-panel :is(p,h1,h2,h3,h4,figure,dl) { max-width: none; }
+.holo-projection {
+  position: absolute;
+  inset: -13px 12px 11px -15px;
+  z-index: -3;
+  pointer-events: none;
+  border: 1px solid #94d8ea2b;
+  border-top-color: #b3e7fb77;
+  clip-path: polygon(24px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 24px);
+  background: linear-gradient(180deg,#bcf0ff06,transparent 20% 90%,#bcf0ff07);
+}
+.holo-projection::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg,transparent 0 3px,#c8efff 3px 4px);
+  opacity: .035;
+}
+.holo-projection::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 8px;
+  width: 2px;
+  background: #b8ecfa77;
+  box-shadow: 0 0 12px #b1eaff55;
+  animation: holo-carrier 14s ease-in-out infinite;
+}
+.holo-projection-scan { position: absolute; top: 0; left: 0; width: 100%; height: 1px; background: #c2efffaa; box-shadow: 0 0 9px #a1e6ff55; animation: holo-scan 600ms ease-out both; }
+.holo-header {
+  position: relative;
+  padding: 10px 25px 7px;
+  border-bottom: 1px solid var(--holo-line);
+  background: linear-gradient(90deg,#a1d3e61a,#a1d3e604);
+}
+.holo-header::after { content: ''; position: absolute; inset: 6px 9px 6px auto; width: 24%; pointer-events: none; border: 1px solid #b3dce818; border-right-color: #beeaff55; clip-path: polygon(15px 0,calc(100% - 15px) 0,100% 15px,100% 100%,0 100%,0 15px); }
+.holo-identity {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: #a9c4d1;
+  font: 500 .61em/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing: .12em;
+}
+.holo-identity > :last-child { color: #b2d3e0; }
+.holo-header h1 { margin: 5px 0 3px; color: #e0f0f5; font-size: 1.42em; font-weight: 500; letter-spacing: .075em; text-transform: uppercase; }
+.holo-header .layer { margin: 0; color: #aec6cf; font-size: .59em; font-weight: 500; letter-spacing: .12em; }
+.holo-modes { display: flex; align-items: end; gap: 8px; padding: 6px 23px 0; }
+.holo-modes button {
+  min-height: 31px;
+  padding: 5px 18px;
+  border-color: #a2cfdf3b;
+  border-bottom: 1px solid #beeaff66;
+  clip-path: polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
+  background: #22344055;
+  text-transform: uppercase;
+  font-size: .68em;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+.holo-modes button[aria-pressed=true] { background: linear-gradient(0deg,#9dd8ef28,#9dd8ef0b); color: #e9faff; border-color: #b5e6f5aa; }
+.holo-record-nav { display: flex; flex-wrap: wrap; gap: 3px; padding: 5px 23px 7px; border-bottom: 1px solid #8dc1d544; }
+.holo-record-nav button { min-height: 29px; max-width: 100%; padding: 4px 11px; font-size: .66em; letter-spacing: .06em; border-color: transparent; border-left: 1px solid #91bfd144; background: #10232b11; }
+.holo-record-nav button[aria-pressed=true] { border-color: #a2d9ed77; color: #e5f8ff; background: #92c9e51a; }
+.holo-content { flex: 1; min-height: 0; padding: 15px 24px 10px; }
+.holo-record-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1.35fr) minmax(0,1fr);
+  gap: 25px;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.holo-log { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; padding: 0; }
+.holo-log-heading { flex-shrink: 0; padding-right: 18px; }
+.holo-log-body { min-height: 0; overflow-y: auto; padding: 0 18px 12px 0; scrollbar-color: #a1ced880 transparent; scrollbar-width: thin; background: linear-gradient(90deg,#111a214d,#111a215c 80%,#111a210a); }
+.holo-log-heading > .layer { margin: 0 0 6px; font-size: .62em; letter-spacing: .1em; color: #b4ccd8; }
+.holo-log h3 { margin: 0 0 10px; font-size: 1.02em; line-height: 1.4; font-weight: 500; letter-spacing: .045em; color: #e4f1f6; }
+.holo-log-body > p { margin: 0 0 14px; font-size: 1em; line-height: 1.6; letter-spacing: .015em; color: #e0eaf0; }
+.holo-log-heading > p:not(.layer) { margin: 0 0 12px; font: .75em/1.6 ui-monospace,Menlo,monospace; color: #b8d0dc; }
+.holo-log-body:focus-visible { outline: 1px solid #b5e7f6; outline-offset: 3px; }
+.holo-log h4 { margin: 16px 0 9px; color: #c5dfe9; font-size: .7em; letter-spacing: .13em; font-weight: 500; text-transform: uppercase; border-bottom: 1px solid #9ccfdf44; padding-bottom: 6px; }
+.holo-log .record-fields { margin: 0 0 20px; grid-template-columns: minmax(100px,.65fr) minmax(0,1.35fr); gap: 8px 16px; font-size: 1em; line-height: 1.55; }
+.holo-log .record-fields dt { color: #b3cbd5; font-weight: 500; }
+.holo-log .record-fields dd { color: #e0eaf0; }
+.hologram-panel a { color: #bdedff; font-size: .88em; text-underline-offset: 3px; }
+.holo-log-body > p.credit { font-size: .77em; line-height: 1.6; color: #bccdd6; }
+.holo-log details { padding: 7px 0; margin: 9px 0; border: 0; border-top: 1px solid #a1c9da44; background: transparent; font-size: .8em; }
+.holo-log summary { color: #c7dce7; font-size: 1em; font-weight: 400; }
+.holo-media { position: relative; min-width: 0; min-height: 0; overflow-y: auto; padding: 4px 0 12px 20px; border-left: 1px solid #a9dce978; scrollbar-color: #a1ced880 transparent; scrollbar-width: thin; }
+.holo-media::before { content: ''; position: absolute; top: 0; left: -1px; width: 8px; height: 35px; background: #b1e9fa66; box-shadow: 0 0 9px #9ae2ff55; }
+.holo-media figure { position: relative; margin: 0; padding: 10px 10px 12px; background: #09111722; border: 1px solid #aadbe866; clip-path: polygon(12px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 12px); }
+.holo-media figure img { display: block; width: 100%; height: min(31vh,280px); max-height: none; object-fit: contain; object-position: center top; filter: none; opacity: 1; }
+.holo-media figcaption { margin: 10px 0 4px; font-size: .86em; line-height: 1.5; color: #d8e8ef; }
+.holo-media .image-label { margin: 5px 4px 0 0; padding: 3px 6px; border: 1px solid #9dcedd55; background: #a7d8ee0c; font-size: .75em; color: #c9dfe9; }
+.holo-media .image-fallback { margin: 0; font-size: .95em; line-height: 1.6; color: #e1e9ed; }
+.holo-record-grid:not(:has(.holo-media)) { grid-template-columns: minmax(0,1fr); }
+.holo-record-grid:not(:has(.holo-media)) .holo-log { max-width: 78ch; padding-right: 24px; }
+.holo-context { margin: 0 24px; padding: 5px 0; border: 0; border-top: 1px solid #a8d6e73b; font-size: .65em; background: transparent; }
+.holo-context summary { color: #adc5d0; font-size: 1em; font-weight: 400; letter-spacing: .06em; }
+.holo-context > p { font-size: 1.15em; margin: 8px 0; line-height: 1.55; padding: 0; border: 0; background: transparent; color: #d1dfe8; }
+.holo-context[open] { max-height: 28vh; flex-shrink: 0; overflow-y: auto; }
+.holo-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 7px 15px; padding: 8px 23px 11px; border-top: 1px solid #addff273; background: linear-gradient(90deg,#a1c7dd18,#a1c7dd04); }
+.holo-footer :is(p,span) { margin: 0; color: #b3cad7; font: .63em/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing: .04em; }
+.holo-footer button { min-height: 34px; font-size: .72em; padding: 5px 13px; border-color: #a7d3e44d; text-transform: uppercase; letter-spacing: .075em; }
+.holo-restore-form { height: 100%; overflow-y: auto; padding-right: 12px; scrollbar-color: #a1ced880 transparent; scrollbar-width: thin; }
+.holo-restore-form > :is(h2,p) { margin: 0 0 13px; }
+.holo-restore-form > h2 { font-size: 1.05em; font-weight: 400; letter-spacing: .06em; }
+.holo-restore-form fieldset { position: relative; border: 0; border-top: 1px solid #a5d8e34d; margin: 0 0 15px; padding: 9px 0 0; min-width: 0; }
+.holo-restore-form legend { color: #d5e8f0; padding: 0 12px 0 0; font-size: .89em; letter-spacing: .035em; }
+.holo-choice { position: relative; display: inline-flex; align-items: center; gap: 9px; min-height: 43px; margin: 0 7px 7px 0; padding: 8px 16px 8px 12px; border: 1px solid #a5cfdf55; background: #9bcee608; cursor: pointer; transition: border-color 160ms, background-color 160ms; }
+.holo-choice input { appearance: none; position: relative; flex: 0 0 10px; width: 10px; height: 10px; margin: 0; border: 1px solid #b8ddeaaa; border-radius: 0; background: transparent; }
+.holo-choice input:checked { background: #c2f0ff; box-shadow: 0 0 8px #ade6ff66; }
+.holo-choice input:focus-visible { outline: 0; }
+.holo-choice:has(input:focus-visible) { outline: 2px solid #c0edff; outline-offset: 2px; }
+.holo-choice:has(input:checked) { background: #a3dff223; border-color: #bcecffbb; box-shadow: inset 3px 0 #abd9e8; }
+.holo-choice:hover { border-color: #c1eafa; background: #aaddef17; }
+.holo-choice > span { font-size: .92em; line-height: 1.45; color: #e1edf2; }
+.holo-choice-long { display: flex; width: 100%; }
+.holo-choice:has(input:disabled) { cursor: default; }
+.holo-restore-form [aria-invalid=true] { border-color: #d4b88b; }
+.holo-form-actions button { margin: 4px 10px 10px 0; font-size: .85em; }
+.holo-question-number { color: #97cadf; font: .8em ui-monospace,Menlo,monospace; margin-right: 12px; }
+.holo-restore-form .hint { color: #d2e5ee; border-left: 1px solid #a9d9ea; font-size: .9em; }
+.holo-restore-form .feedback { color: #e1cba7; font-size: .92em; }
+.holo-restore-form .legacy { color: #dce9ee; border-color: #a4d1e35b; font-size: .9em; }
+.hologram-closing-frame { position: fixed; z-index: 8; pointer-events: none; border: 1px solid #a9def2aa; background: linear-gradient(90deg,#9dd9ff10,#9dd9ff03); clip-path: polygon(16px 0,calc(100% - 28px) 0,100% 24px,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 16px); animation: holo-dismiss 220ms ease-in both; }
+@keyframes holo-deploy { from { transform: rotateY(-5deg) rotateX(.6deg) rotateZ(-.55deg) translateY(11px) scaleY(.97); } to { transform: rotateY(-3deg) rotateX(.6deg) rotateZ(-.55deg) translateY(0) scaleY(1); } }
+@keyframes holo-scan { from { opacity: .8; transform: translateY(0); } to { opacity: 0; transform: translateY(100px); } }
+@keyframes holo-carrier { 0%,44%,48%,100% { opacity: .74; } 46% { opacity: .52; } 76% { opacity: .66; } }
+@keyframes holo-dismiss { to { opacity: 0; transform: translateY(5px) scaleY(.97); } }
+.reduced-intensity .hologram-panel { animation: none; transform: none; }
+.reduced-intensity .holo-projection::after { animation: none; }
+.reduced-intensity .holo-projection-scan { display: none; }
+.reduced-intensity .hologram-closing-frame { display: none; }
+.large-interface-text .hologram-overlay { padding: 4vh 5vw; }
+.large-interface-text .hologram-panel { height: 89dvh; transform: none; animation: none; }
+.large-interface-text .holo-content { overflow-y: auto; }
+.large-interface-text .holo-record-grid { height: auto; grid-template-columns: minmax(0,1fr); }
+.large-interface-text .holo-log,.large-interface-text .holo-log-body { overflow: visible; padding-right: 0; }
+.large-interface-text .holo-media { border-left: 0; border-top: 1px solid var(--holo-line); padding: 15px 0 0; overflow: visible; }
+.large-interface-text .holo-media figure img { height: 32vh; }
+.large-interface-text .holo-restore-form { height: auto; overflow: visible; }
+@media(max-width:900px) {
+  .hologram-overlay { padding: 4vh 5vw; }
+  .hologram-panel { height: 88dvh; transform: none; animation: none; }
+  .holo-record-grid { grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); gap: 16px; }
+  .holo-header,.holo-content { padding-left: 16px; padding-right: 16px; }
+  .holo-record-nav,.holo-modes { padding-left: 16px; padding-right: 16px; }
+  .holo-media { padding-left: 12px; }
+}
+@media(max-width:680px) {
+  .hologram-overlay { padding: 3vh 4vw; }
+  .holo-header h1 { font-size: 1.15em; }
+  .holo-identity { font-size: .53em; }
+  .holo-content { overflow-y: auto; }
+  .holo-record-grid { height: auto; grid-template-columns: minmax(0,1fr); }
+  .holo-log,.holo-log-body { overflow: visible; padding-right: 0; }
+  .holo-log .record-fields { grid-template-columns: minmax(0,1fr); }
+  .holo-media { overflow: visible; border-left: 0; border-top: 1px solid var(--holo-line); padding: 15px 0 0; }
+  .holo-restore-form { height: auto; overflow: visible; }
+  .holo-modes button { font-size: .61em; padding: 5px 12px; }
+  .holo-choice { display: flex; }
+  .holo-footer { padding-left: 16px; padding-right: 16px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .hologram-panel { animation: none; transform: none; }
+  .holo-projection::after { animation: none; }
+  .holo-projection-scan { display: none; }
+  .hologram-closing-frame { display: none; }
+}

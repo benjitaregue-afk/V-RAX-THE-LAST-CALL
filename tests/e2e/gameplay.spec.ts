@@ -66,7 +66,11 @@ async function resume(page: Page): Promise<void> {
   await expect(page.locator('#scene')).toHaveAttribute('data-mode', 'PLAYING');
 }
 async function solve(page: Page, id: string, answers: Record<string, string>, label: string, stage: string): Promise<void> {
-  for (const [field, value] of Object.entries(answers)) await page.locator(`[id="${id}-${field}"]`).selectOption(value);
+  if(id==='PZ-02') await page.getByRole('button',{name:'Reconstruction',exact:true}).click();
+  for (const [field, value] of Object.entries(answers)) {
+    if(id==='PZ-02') await page.locator(`input[type="radio"][name="${field}"][value="${value}"]`).check();
+    else await page.locator(`[id="${id}-${field}"]`).selectOption(value);
+  }
   await page.getByRole('button', { name: label, exact: true }).click();
   await expect(page.locator('#scene')).toHaveAttribute('data-stage', stage);
 }

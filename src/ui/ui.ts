@@ -2,7 +2,6 @@
 // The first hybrid terminal prototype is scoped to Opportunity pending visual review.
 import type { GameState, PuzzleId, ScientificRecord } from '../game/contracts';
 import { stageIndex } from '../game/contracts';
-import { RECTS } from '../world/layout';
 import { project } from '../game/projection';
 import { PUZZLES, puzzleById } from '../content/puzzles';
 import { RECORDS, recordById } from '../content/records';
@@ -15,6 +14,7 @@ import { STORY, SHIP_CONTEXT, SURVIVOR_PREMISE } from '../content/story';
 import type { SceneBeat } from '../content/story';
 import './style.css';
 import './terminal.css';
+import './hologram.css';
 
 export interface UIActions {
   getState(): GameState;
@@ -98,7 +98,7 @@ export class GameUI {
     this.presentationSettings();
     document.addEventListener('keydown', (event) => {
       if (this.overlay.hidden) return;
-      if (event.code === 'KeyH' && this.hintAction && !(event.target instanceof HTMLInputElement)) {
+      if (event.code === 'KeyH' && this.hintAction && (!(event.target instanceof HTMLInputElement) || event.target.type === 'radio')) {
         event.preventDefault();
         this.hintAction();
       }
@@ -118,8 +118,9 @@ export class GameUI {
   private show(title: string, layer?: string): HTMLElement {
     this.presentationSettings();
     this.closingFrame?.remove(); this.closingFrame = null;
-    this.overlay.classList.remove('terminal-overlay');
-    this.panel.classList.remove('terminal-panel');
+    this.overlay.classList.remove('terminal-overlay', 'hologram-overlay');
+    this.panel.classList.remove('terminal-panel', 'hologram-panel');
+    delete this.panel.dataset.holoMode; delete this.panel.dataset.holoRecord;
     delete this.panel.dataset.device;
     this.hintAction = null;
     this.cinematic = null;
@@ -144,6 +145,8 @@ export class GameUI {
 
   hide(): void {
     this.closeTerminalFrame();
+    this.overlay.classList.remove('hologram-overlay'); this.panel.classList.remove('hologram-panel');
+    delete this.panel.dataset.holoMode; delete this.panel.dataset.holoRecord;
     this.cinematic = null;
     delete this.panel.dataset.cinematic;
     delete this.panel.dataset.beat;
@@ -197,9 +200,10 @@ export class GameUI {
   /** The closing shell is decorative; exploration and focus return immediately. */
   private closeTerminalFrame(): void {
     this.closingFrame?.remove(); this.closingFrame = null;
-    if (!this.overlay.classList.contains('terminal-overlay') || this.overlay.hidden || this.calmInterface()) return;
+    const hologram = this.overlay.classList.contains('hologram-overlay');
+    if ((!hologram && !this.overlay.classList.contains('terminal-overlay')) || this.overlay.hidden || this.calmInterface()) return;
     const rect = this.panel.getBoundingClientRect();
-    const frame = node('div', undefined, 'terminal-closing-frame');
+    const frame = node('div', undefined, hologram ? 'hologram-closing-frame' : 'terminal-closing-frame');
     frame.setAttribute('aria-hidden', 'true'); frame.inert = true;
     Object.assign(frame.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
     this.root.append(frame); this.closingFrame = frame;
@@ -300,6 +304,7 @@ export class GameUI {
   }
 
   showPuzzle(id: PuzzleId): void {
+    if (id === 'PZ-02') { this.showOpportunityHologram(); return; }
     const def = puzzleById(id);
     const status = project(this.actions.getState()).puzzles[id];
     const p = this.show(def.title, def.layer);
@@ -315,15 +320,9 @@ export class GameUI {
     if (def.recordIds.length) evidence.append(node('h2', 'Evidence library'));
     for (const recordId of def.recordIds) {
       const record = recordById(recordId);
-      if (id === 'PZ-02' && recordId === 'R-PIA05584') {
-        const primary = this.record(record); primary.classList.add('terminal-primary-record');
-        evidence.append(primary);
-        this.actions.recordViewed(record.id);
-      } else {
-        const d = details(record.title, this.record(record));
-        d.addEventListener('toggle', () => { if (d.open) this.actions.recordViewed(record.id); });
-        evidence.append(d);
-      }
+      const d = details(record.title, this.record(record));
+      d.addEventListener('toggle', () => { if (d.open) this.actions.recordViewed(record.id); });
+      evidence.append(d);
     }
     const form = node('form', undefined, 'puzzle-form');
     const answers: Record<string, string> = { ...(def.initial ?? {}) };
@@ -364,79 +363,187 @@ export class GameUI {
     } else {
       result.append(node('p', def.success));
       if (id === 'PZ-01') result.append(this.legacy('LEGACY-INSIGHT'));
-      if (id === 'PZ-02') result.append(this.legacy('LEGACY-OPPORTUNITY'));
     }
     form.append(result);
     if (id === 'PZ-03' && project(this.actions.getState()).canPreserve) form.append(button('Activate distress beacon', () => this.actions.preserve(), 'primary'), node('p', 'FICTIONAL SHIP SYSTEM: this opens the survivor channel in the story. No real spacecraft is contacted and no data is uploaded.', 'note'));
     form.append(button(TEXT.resume, () => this.actions.resume()));
     columns.append(evidence, form); p.append(columns);
-    if (id === 'PZ-02') this.opportunityTerminal(p, evidence, form, def.recordIds.length);
   }
 
-  /** First device prototype: only the Opportunity restoration terminal is dressed. */
-  private opportunityTerminal(panel: HTMLElement, evidence: HTMLElement, form: HTMLElement, recordCount: number): void {
-    this.overlay.classList.add('terminal-overlay'); panel.classList.add('terminal-panel');
-    panel.dataset.device = 'opportunity-archive';
+  /** Witness in Stone's optical projection is isolated from the other interfaces. */
+  private showOpportunityHologram(): void {
+    const id = 'PZ-02' as const;
+    const def = puzzleById(id);
+    const status = project(this.actions.getState()).puzzles[id];
+    const panel = this.show(def.title, def.layer);
+    panel.dataset.puzzle = id; panel.dataset.device = 'opportunity-hologram';
+    panel.dataset.holoMode = 'archive';
+    this.overlay.classList.add('hologram-overlay'); panel.classList.add('hologram-panel');
     const title = panel.querySelector('h1')!;
     const layer = panel.querySelector(':scope > .layer')!;
-    const header = node('header', undefined, 'terminal-header');
-    const identity = node('div', undefined, 'terminal-identity');
-    identity.append(node('span', 'VØRAX / LOCAL ARCHIVE'), node('span', 'EAST BAY · CONSOLE 02', 'terminal-serial'));
-    const heading = node('div', undefined, 'terminal-heading');
-    const titleBlock = node('div'); titleBlock.append(layer, title);
-    const state = node('div', undefined, 'terminal-state');
-    state.append(node('span', 'LOCAL COPY', 'terminal-state-light'), node('span', 'SOURCES AVAILABLE OFFLINE'));
-    heading.append(titleBlock, state);
-    const nav = node('nav', undefined, 'terminal-nav'); nav.setAttribute('aria-label', 'Archive terminal sections');
-    const jump = (target: HTMLElement): void => {
-      target.scrollIntoView({ behavior: this.calmInterface() ? 'auto' : 'smooth', block: 'start' });
-      target.focus({ preventScroll: true });
+    const header = node('header', undefined, 'holo-header');
+    const identity = node('div', undefined, 'holo-identity');
+    identity.append(node('span', 'VØRAX / OPTICAL ARCHIVE 02'), node('span', 'LOCAL PROJECTION', 'holo-signal'));
+    const heading = node('div', undefined, 'holo-heading'); heading.append(title, layer);
+    header.append(identity, heading);
+    const projection = node('div', undefined, 'holo-projection');
+    projection.setAttribute('aria-hidden', 'true');
+    projection.append(node('div', undefined, 'holo-projection-grid'), node('div', undefined, 'holo-projection-scan'));
+    const content = node('section', undefined, 'holo-content');
+    content.setAttribute('aria-label', 'Witness in Stone archive');
+    const context = details('Archive context', node('p', SHIP_CONTEXT[id]), node('p', def.layerNote), node('p', def.instruction));
+    context.classList.add('holo-context');
+    const footer = node('footer', undefined, 'holo-footer');
+    const resume = button(TEXT.resume, () => this.actions.resume(), 'holo-return');
+    footer.append(node('span', 'FICTIONAL SHIP PROJECTION', 'holo-footer-note'), node('span', 'TAB focus · ENTER select · H hint · ESC pause', 'holo-key-legend'), resume);
+    if (status === 'locked') {
+      content.append(node('p', 'Restore the previous record first. Follow the objective in your HUD.', 'feedback'));
+      panel.replaceChildren(projection, header, content, context, footer);
+      return;
+    }
+
+    let mode: 'archive' | 'restore' = 'archive';
+    let selectedRecord = 'R-PIA05584';
+    let archive = this.hologramRecord(recordById(selectedRecord));
+    this.actions.recordViewed(selectedRecord);
+    const form = node('form', undefined, 'holo-restore-form');
+    form.setAttribute('aria-label', 'Witness in Stone reconstruction');
+    const formBody = node('div', undefined, 'holo-restore-body');
+    const formActions = node('div', undefined, 'holo-form-actions');
+    const answers: Record<string, string> = { ...(def.initial ?? {}) };
+    const solved = status === 'solved';
+    if (solved) Object.assign(answers, def.solution);
+    const groups = new Map<string, HTMLFieldSetElement>();
+    const inputs = new Map<string, HTMLInputElement[]>();
+    for (const [index, field] of def.fields.entries()) {
+      const group = node('fieldset', undefined, 'holo-question');
+      group.id = `${id}-${field.id}`; group.disabled = solved;
+      const legend = node('legend');
+      const number = node('span', String(index + 1).padStart(2, '0'), 'holo-question-number'); number.setAttribute('aria-hidden', 'true');
+      legend.append(number, node('span', field.label)); group.append(legend);
+      const choices = node('div', undefined, field.id === 'conclusion' ? 'holo-choices holo-choices-long' : 'holo-choices holo-choices-short');
+      const fieldInputs: HTMLInputElement[] = [];
+      for (const option of field.options) {
+        const label = node('label', undefined, `holo-choice ${field.id === 'conclusion' ? 'holo-choice-long' : 'holo-choice-short'}`);
+        const input = node('input'); input.type = 'radio'; input.name = field.id;
+        input.id = `${id}-${field.id}-${option.id}`; input.value = option.id; input.dataset.value = option.id;
+        input.checked = answers[field.id] === option.id;
+        input.disabled = solved;
+        label.append(input, node('span', option.label, 'holo-choice-label'));
+        label.classList.toggle('is-selected', input.checked);
+        input.addEventListener('change', () => {
+          if (!input.checked) return;
+          answers[field.id] = input.value;
+          for (const radio of fieldInputs) radio.closest('label')?.classList.toggle('is-selected', radio.checked);
+        });
+        fieldInputs.push(input); choices.append(label);
+      }
+      inputs.set(field.id, fieldInputs); groups.set(field.id, group);
+      group.append(choices);
+      if (solved && field.reason) group.append(node('small', field.reason));
+      formBody.append(group);
+    }
+    const result = node('div', undefined, 'feedback holo-feedback');
+    result.id = 'PZ-02-feedback'; result.setAttribute('role', 'status'); result.tabIndex = -1;
+    const hint = node('p', '', 'hint holo-hint');
+    let hintIndex = -1;
+    const hintButton = button('Hint (H)', () => {
+      hintIndex = Math.min(hintIndex + 1, def.hints.length - 1);
+      hint.textContent = def.hints[hintIndex] ?? '';
+    }, 'holo-hint-button');
+    const submit = node('button', def.confirmLabel, 'primary holo-submit'); submit.type = 'submit';
+    const markSolved = (): void => {
+      for (const group of groups.values()) group.disabled = true;
+      submit.remove(); hintButton.remove(); hint.textContent = '';
+      this.hintAction = null;
+      form.dataset.solved = 'true';
+      result.replaceChildren(node('p', def.success), this.legacy('LEGACY-OPPORTUNITY'));
     };
-    evidence.id = 'terminal-evidence'; evidence.tabIndex = -1; evidence.setAttribute('aria-label', 'Opportunity scientific evidence');
-    form.id = 'terminal-restoration'; form.tabIndex = -1; form.setAttribute('aria-label', 'Opportunity restoration choices');
-    nav.append(button('01 / Evidence', () => jump(evidence), 'terminal-section-link'), button('02 / Restore interpretation', () => jump(form), 'terminal-section-link'));
-    header.append(identity, heading, nav);
-    const brief = node('div', undefined, 'terminal-brief');
-    for (const item of Array.from(panel.children)) if (item.tagName === 'P') brief.append(item);
-    const mission = node('div', undefined, 'terminal-mission');
-    mission.append(node('span', 'ACTIVE SHIP OBJECTIVE', 'terminal-kicker'), node('p', project(this.actions.getState()).objective));
-    const rail = node('aside', undefined, 'terminal-rail');
-    rail.setAttribute('aria-label', 'Fictional terminal location and archive index');
-    rail.append(node('p', 'TERMINAL LOCATION', 'terminal-kicker'), node('h2', 'Opportunity'), node('p', 'EAST / WITNESS IN STONE', 'terminal-location'), this.stationMap());
-    const index = node('div', undefined, 'terminal-index');
-    index.append(node('p', 'ARCHIVE CONTENTS', 'terminal-kicker'), node('strong', `${String(recordCount).padStart(2, '0')} records`), node('p', 'Image · Instruments · Geological context · Mission catalog'));
-    const limits = node('div', undefined, 'terminal-index');
-    limits.append(node('p', 'INTERPRETATION', 'terminal-kicker'), node('p', 'Read the evidence. Separate appearance, composition and conclusion.'));
-    rail.append(index, limits, node('p', 'TAB focus / H hint / ESC pause', 'terminal-keyboard'));
-    const columns = panel.querySelector('.puzzle-columns')!;
-    const workspace = node('div', undefined, 'terminal-workspace'); workspace.append(rail, columns);
-    form.prepend(node('p', 'RESTORATION / EDUCATIONAL MODEL', 'terminal-kicker'), node('h2', 'Restore interpretation'));
-    const footer = node('footer', undefined, 'terminal-footer');
-    footer.append(node('span', 'FICTIONAL SHIP INTERFACE'), node('span', 'NASA evidence retains its source, credit and original image.'));
-    panel.replaceChildren(header, mission, brief, workspace, footer);
+    if (solved) markSolved();
+    else {
+      formActions.append(submit, hintButton);
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const validation = this.actions.submit(id, answers);
+        if (validation.solved) { markSolved(); result.focus({ preventScroll: true }); result.scrollIntoView({ block: 'nearest' }); return; }
+        result.replaceChildren(node('p', validation.complete ? 'Check the evidence and try again.' : 'Choose an answer for every field.'));
+        for (const text of validation.feedback) result.append(node('p', text));
+        for (const [key, group] of groups) {
+          const invalid = validation.fields[key] !== 'correct';
+          group.setAttribute('aria-invalid', String(invalid)); group.setAttribute('aria-describedby', result.id);
+          for (const input of inputs.get(key) ?? []) input.setAttribute('aria-invalid', String(invalid));
+        }
+      });
+    }
+    formBody.append(hint, result); form.append(formBody, formActions);
+
+    const modes = node('nav', undefined, 'holo-modes'); modes.setAttribute('aria-label', 'Witness in Stone modes');
+    const recordNav = node('nav', undefined, 'holo-record-nav'); recordNav.setAttribute('aria-label', 'Opportunity archive records');
+    const archiveMode = button('Archive log', () => showMode('archive'), 'holo-mode');
+    const restoreMode = button('Reconstruction', () => showMode('restore'), 'holo-mode');
+    archiveMode.id = 'holo-mode-archive'; restoreMode.id = 'holo-mode-restore';
+    modes.append(archiveMode, restoreMode);
+    const recordButtons = new Map<string, HTMLButtonElement>();
+    for (const recordId of def.recordIds) {
+      const record = recordById(recordId);
+      const shortTitle = ({ 'R-PIA05584': 'PIA05584', 'R-MER-INSTRUMENTS': 'Instruments', 'R-WATER': 'Combined evidence', 'R-OPPORTUNITY': 'Mission catalog' } as Record<string, string>)[recordId] ?? record.title;
+      const control = button(shortTitle, () => {
+        if (selectedRecord === recordId) return;
+        selectedRecord = recordId;
+        archive = this.hologramRecord(record);
+        this.actions.recordViewed(recordId);
+        showMode('archive');
+      }, 'holo-record-link');
+      control.setAttribute('aria-label', record.title);
+      control.dataset.recordTarget = recordId;
+      recordButtons.set(recordId, control); recordNav.append(control);
+    }
+    const showMode = (next: 'archive' | 'restore'): void => {
+      mode = next; panel.dataset.holoMode = mode; panel.dataset.holoRecord = selectedRecord;
+      archiveMode.setAttribute('aria-pressed', String(mode === 'archive'));
+      restoreMode.setAttribute('aria-pressed', String(mode === 'restore'));
+      for (const [recordId, control] of recordButtons) control.setAttribute('aria-pressed', String(recordId === selectedRecord));
+      recordNav.hidden = mode !== 'archive';
+      content.setAttribute('aria-labelledby', mode === 'archive' ? archiveMode.id : restoreMode.id);
+      content.replaceChildren(mode === 'archive' ? archive : form);
+      content.scrollTop = 0;
+      this.hintAction = form.dataset.solved === 'true' ? null : () => {
+        showMode('restore'); hintButton.click();
+        // Archive controls may have been detached/hidden by the mode change.
+        hintButton.focus({ preventScroll: true }); hint.scrollIntoView({ block: 'nearest' });
+      };
+    };
+    panel.replaceChildren(projection, header, modes, recordNav, content, context, footer);
+    showMode('archive');
   }
 
-  private stationMap(): HTMLElement {
-    const figure = node('figure', undefined, 'terminal-map');
-    const ns = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(ns, 'svg');
-    svg.setAttribute('viewBox', '-16 -32 32 42'); svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', 'Fictional station layout. Opportunity is east of the hub.');
-    for (const rect of RECTS) {
-      const shape = document.createElementNS(ns, 'rect');
-      shape.setAttribute('x', String(rect.x0)); shape.setAttribute('y', String(-rect.z1));
-      shape.setAttribute('width', String(rect.x1 - rect.x0)); shape.setAttribute('height', String(rect.z1 - rect.z0));
-      shape.setAttribute('class', rect.zone === 'OPPORTUNITY' ? 'map-current' : rect.kind === 'connector' ? 'map-connector' : 'map-room');
-      svg.append(shape);
-      if (rect.kind === 'room') {
-        const text = document.createElementNS(ns, 'text');
-        text.setAttribute('x', String((rect.x0 + rect.x1) / 2)); text.setAttribute('y', String(-(rect.z0 + rect.z1) / 2));
-        text.textContent = ({ AIRLOCK: 'A0', HUB: 'HUB', OPPORTUNITY: 'OPP', INSIGHT: 'INS', RELAY: 'RELAY', OBSERVATION: 'DECK' } as const)[rect.zone];
-        svg.append(text);
-      }
+  /** Preserve each reviewed node, placing interpretation before literal catalog fields. */
+  private hologramRecord(record: ScientificRecord): HTMLElement {
+    const article = this.record(record);
+    article.classList.add('holo-record-grid');
+    const original = Array.from(article.children);
+    const figure = article.querySelector(':scope > figure');
+    const headings = Array.from(article.querySelectorAll(':scope > h4'));
+    const catalogHeading = headings[0]; const editorialHeading = headings[1];
+    const sourceIndex = original.findIndex((child) => child.tagName === 'A');
+    const editorialIndex = editorialHeading ? original.indexOf(editorialHeading) : -1;
+    const header = node('header', undefined, 'holo-log-heading');
+    header.append(...original.slice(0, 3));
+    const body = node('div', undefined, 'holo-log-body');
+    body.tabIndex = 0; body.setAttribute('role', 'region'); body.setAttribute('aria-label', `Scientific text: ${record.title}`);
+    if (editorialHeading) body.append(editorialHeading);
+    if (editorialIndex >= 0 && sourceIndex > editorialIndex) body.append(...original.slice(editorialIndex + 1, sourceIndex));
+    if (catalogHeading) body.append(catalogHeading);
+    const fields = article.querySelector(':scope > .record-fields'); if (fields) body.append(fields);
+    if (sourceIndex >= 0) body.append(...original.slice(sourceIndex));
+    const log = node('section', undefined, 'holo-log'); log.append(header, body);
+    article.replaceChildren(log);
+    article.dataset.hasMedia = String(Boolean(figure));
+    if (figure) {
+      const media = node('aside', undefined, 'holo-media'); media.setAttribute('aria-label', 'Original NASA image and caption');
+      media.append(figure); article.append(media);
     }
-    figure.append(svg, node('figcaption', 'FICTIONAL SHIP LAYOUT'), node('p', '● East archive / current terminal', 'terminal-map-location'));
-    return figure;
+    return article;
   }
 
   private record(r: ScientificRecord): HTMLElement {

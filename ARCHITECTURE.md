@@ -139,3 +139,7 @@ Ante WebGL/context loss: pausar, conservar estado disponible y ofrecer recarga/c
 ## R4 viewmodel implementation — 2026-11-15
 
 `FirstPersonHands` loads the local `assets/models/player-hands.glb`, preserves the seven original clip names and adds Walk1.12s, Sprint.72s and Inspect1.4s. `setMotion`, `setInteractionTarget` and `setClearance` supply presentation inputs. Joint TRS channels sample on the game clock and blend with quaternion interpolation; pausing freezes both sampling and transition time. Source/instance meshes receive two restricted camera-local lights and no cabin fog. Gameplay keeps input, collision, interaction proxies and reducer authority; render meshes remain non-colliding/non-pickable. Prologue support uses the same camera trajectory and time phase as the authored clip. Delivery and validation are in CINEMATIC_OVERHAUL.md.
+
+## PZ-02 optical projection prototype — 2026-11-15
+
+`GameUI.showPuzzle('PZ-02')` delegates to an isolated optical reader in `ui.ts`; `hologram.css` affects only its classes. CSS perspective retains semantic DOM controls and source links. It reuses unchanged `record()` nodes, moving the figure into the right column and original text into the left. The reconstruction form persists while modes switch; radio names/values use the existing field/option IDs and call the same submit validator. No reducer/save/world/camera contract changed. The ordinary contextual hand interaction remains in `main.ts`. Wider rollout awaits user visual approval.

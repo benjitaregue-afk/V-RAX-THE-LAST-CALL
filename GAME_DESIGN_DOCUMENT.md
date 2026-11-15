@@ -134,3 +134,7 @@ Las respuestas, IDs, prerrequisitos y eventos anteriores son contratos compartid
 ## R4 visual embodiment — 2026-11-15
 
 The first authored industrial glove model and animation direction were approved by the user. The viewmodel is visual only: ten authored clips with .18 s transitions, restrained locomotion, bounded target guidance and wall retraction. Text panels and non-awakening dialogue hide the hands. The prologue uses the measured floor-support camera with zero roll and synchronized hand/standing time. E can still finish an interaction immediately; no skinning or animation callback changes story progression. Puzzles, prerequisites, reach, save format and scientific sources are unchanged. Current production/QA status: CINEMATIC_OVERHAUL.md.
+
+## Witness in Stone optical prototype — pending visual approval
+
+PZ-02 alone uses Archive log/Reconstruction modes, four original evidence records and native radio-card groups. Question labels, option IDs, answers and validation are unchanged. Tab/Shift+Tab, native arrow/Space selection, Enter confirmation, H hint and Esc pause remain available. E performs the existing contextual hand gesture before opening; scientific panels hide the hands. Perspective and decorative projection motion turn off with reduced intensity or OS reduced-motion; large text stacks the same evidence. This is a visual-review prototype, not approval to redesign other terminals, HUD or journal. Executed evidence: CINEMATIC_OVERHAUL.md.
