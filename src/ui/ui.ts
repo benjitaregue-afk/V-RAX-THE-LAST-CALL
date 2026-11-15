@@ -17,6 +17,7 @@ import './style.css';
 import './terminal.css';
 import './hologram.css';
 import './optical-system.css';
+import './rescue-ending.css';
 
 export interface UIActions {
   getState(): GameState;
@@ -69,6 +70,9 @@ export class GameUI {
   private readonly captionBox = node('div', undefined, 'caption-box');
   private readonly toast = node('div', '', 'toast');
   private readonly hudBox = node('div', undefined, 'hud');
+  private readonly rescueGlare = node('div', undefined, 'rescue-glare');
+  private glareOrigin = { x: 0.5, y: 0.4 };
+  private rescueTransition: { duration: number; elapsed: number; onDone: () => void } | null = null;
   private readonly missionProgress = node('ol', undefined, 'mission-progress');
   private readonly missionCount = node('span', '', 'mission-count');
   private lastMissionStage = '';
@@ -95,7 +99,10 @@ export class GameUI {
     this.hudBox.append(top, node('div', '+', 'reticle'), this.interaction, controls, mark);
     this.captionBox.setAttribute('aria-live', 'polite');
     this.toast.setAttribute('role', 'status');
-    root.replaceChildren(this.hudBox, this.captionBox, this.toast, this.overlay);
+    this.rescueGlare.setAttribute('aria-hidden', 'true'); this.rescueGlare.inert = true; this.rescueGlare.hidden = true;
+    this.rescueGlare.append(node('div', undefined, 'rescue-glare-radial'), node('div', undefined, 'rescue-glare-white'));
+    root.replaceChildren(this.hudBox, this.rescueGlare, this.captionBox, this.toast, this.overlay);
+    this.setRescueGlare(0);
     this.overlay.hidden = true;
     this.presentationSettings();
     document.addEventListener('keydown', (event) => {
@@ -126,9 +133,10 @@ export class GameUI {
     delete this.panel.dataset.holoMode; delete this.panel.dataset.holoRecord;
     delete this.panel.dataset.device;
     this.hintAction = null;
-    this.cinematic = null;
-    this.overlay.classList.remove('cinematic-overlay', 'ending-overlay');
-    this.panel.classList.remove('cinematic-panel', 'end-panel');
+    this.cinematic = null; this.rescueTransition = null;
+    delete this.root.dataset.rescueTransitionProgress;
+    this.overlay.classList.remove('cinematic-overlay', 'ending-overlay', 'rescue-transition-overlay', 'white-ending-overlay', 'ending-credits-overlay');
+    this.panel.classList.remove('cinematic-panel', 'end-panel', 'rescue-transition-panel', 'white-end-panel', 'ending-credits-panel');
     this.root.classList.remove('cinematic-active');
     delete this.panel.dataset.puzzle;
     delete this.panel.dataset.cinematic;
@@ -151,12 +159,13 @@ export class GameUI {
     this.overlay.classList.remove('hologram-overlay'); this.panel.classList.remove('hologram-panel', 'holo-system', 'holo-journal', 'holo-record-panel');
     delete this.panel.dataset.journalMode; delete this.panel.dataset.dialogueChannel;
     delete this.panel.dataset.holoMode; delete this.panel.dataset.holoRecord;
-    this.cinematic = null;
+    this.cinematic = null; this.rescueTransition = null;
+    delete this.root.dataset.rescueTransitionProgress;
     delete this.panel.dataset.cinematic;
     delete this.panel.dataset.beat;
     delete this.panel.dataset.sequence;
-    this.overlay.classList.remove('cinematic-overlay', 'ending-overlay');
-    this.panel.classList.remove('cinematic-panel', 'end-panel');
+    this.overlay.classList.remove('cinematic-overlay', 'ending-overlay', 'rescue-transition-overlay', 'white-ending-overlay', 'ending-credits-overlay');
+    this.panel.classList.remove('cinematic-panel', 'end-panel', 'rescue-transition-panel', 'white-end-panel', 'ending-credits-panel');
     this.root.classList.remove('cinematic-active');
     delete this.root.dataset.cinematic;
     delete this.root.dataset.cinematicBeat;
@@ -763,8 +772,15 @@ export class GameUI {
     return section;
   }
 
-  /** Cumulative elapsed seconds since showCinematic(), not frame delta. */
+  /** Cumulative elapsed seconds since the active cinematic/transition began, not frame delta. */
   updateCinematic(elapsedSeconds: number): void {
+    if (this.rescueTransition) {
+      if (!Number.isFinite(elapsedSeconds)) return;
+      const transition = this.rescueTransition; transition.elapsed = Math.max(transition.elapsed, elapsedSeconds);
+      this.root.dataset.rescueTransitionProgress = String(Math.min(1, transition.elapsed / transition.duration));
+      if (transition.elapsed >= transition.duration) this.finishRescueTransition();
+      return;
+    }
     const current = this.cinematic;
     if (!current || !Number.isFinite(elapsedSeconds)) return;
     current.elapsed = Math.max(current.elapsed, elapsedSeconds);
@@ -839,24 +855,62 @@ export class GameUI {
     this.showCinematic('EPILOGUE\nNOT FORGOTTEN', STORY.monologue, () => this.actions.finishEnding());
   }
 
+  /** Fullscreen visual exposure, independent from gameplay and animation completion. */
+  setRescueGlare(value: number, origin?: { x: number; y: number }, calm = false): void {
+    const level = Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
+    if (origin) this.glareOrigin = {
+      x: Number.isFinite(origin.x) ? Math.max(0, Math.min(1, origin.x)) : this.glareOrigin.x,
+      y: Number.isFinite(origin.y) ? Math.max(0, Math.min(1, origin.y)) : this.glareOrigin.y,
+    };
+    const quiet = calm || this.calmInterface();
+    this.root.style.setProperty('--rescue-glare', String(level));
+    this.root.style.setProperty('--rescue-glare-radial', String(quiet ? 0 : level * (1 - level) * 1.8));
+    this.root.style.setProperty('--rescue-glare-x', `${this.glareOrigin.x * 100}%`);
+    this.root.style.setProperty('--rescue-glare-y', `${this.glareOrigin.y * 100}%`);
+    this.root.dataset.rescueGlare = String(level); this.root.dataset.rescueGlareCalm = String(quiet);
+    this.rescueGlare.hidden = level <= 0;
+  }
+
+  /** The same monotonic cinematic clock drives this transition; Skip remains explicit. */
+  showRescueTransition(duration: number, onDone: () => void): void {
+    const panel = this.show('Rescue searchlight transition');
+    this.rescueTransition = { duration: Number.isFinite(duration) && duration > 0 ? duration : 3.2, elapsed: 0, onDone };
+    this.overlay.classList.add('rescue-transition-overlay'); panel.classList.add('rescue-transition-panel');
+    this.root.classList.add('cinematic-active'); this.captionBox.hidden = true;
+    this.root.dataset.cinematic = 'rescue-transition'; panel.dataset.cinematic = 'rescue-transition';
+    panel.dataset.sequence = 'rescue-transition'; this.root.dataset.rescueTransitionProgress = '0';
+    panel.replaceChildren(button('Skip transition', () => this.finishRescueTransition(), 'rescue-transition-skip'));
+  }
+
+  private finishRescueTransition(): void {
+    const transition = this.rescueTransition;
+    if (!transition) return;
+    this.rescueTransition = null;
+    this.setRescueGlare(1);
+    this.hide();
+    transition.onDone();
+  }
+
   showComplete(): void {
-    const p = this.show('THE END', 'VØRAX · THE LAST SIGNAL');
-    this.overlay.classList.add('ending-overlay');
-    p.classList.add('end-panel');
-    p.append(node('p', 'Some missions never truly end.', 'ending-line'));
-    p.append(node('p', 'The evacuation, survivor, damaged spacecraft and Rescue One are fiction. The scientific records of Opportunity and InSight are real, with sources and credits available below.', 'note'));
-    const row = node('div', undefined, 'actions');
-    row.append(button('RESTART', () => this.actions.start(true), 'primary'), button('CREDITS', () => this.showFinalCredits()));
-    p.append(row);
+    this.setRescueGlare(1);
+    const panel = this.show('THE END');
+    this.overlay.classList.add('ending-overlay', 'white-ending-overlay');
+    panel.classList.add('end-panel', 'white-end-panel');
+    const row = node('div', undefined, 'actions ending-actions');
+    row.append(button('RESTART', () => this.actions.start(true)), button('CREDITS', () => this.showFinalCredits()));
+    panel.append(row);
   }
 
   showFinalCredits(): void {
-    const p = this.show('CREDITS', 'SCIENCE · ORIGINAL FICTION · CONTRIBUTORS');
-    this.overlay.classList.add('ending-overlay');
-    p.append(node('p', 'Opportunity and InSight: scientific legacy preserved through real NASA records. The survivor and rescue narrative is an original fictional frame, not historical mission evidence.'));
-    p.append(this.legacy('LEGACY-OPPORTUNITY'), this.legacy('LEGACY-INSIGHT'));
+    this.setRescueGlare(1);
+    const panel = this.show('CREDITS', 'SCIENCE · ORIGINAL FICTION · CONTRIBUTORS');
+    this.overlay.classList.add('ending-overlay', 'ending-credits-overlay'); panel.classList.add('ending-credits-panel');
+    panel.append(node('p', 'Some missions never truly end.', 'ending-line'));
+    panel.append(node('p', 'The evacuation, survivor, damaged spacecraft and Rescue One are fiction. The scientific records of Opportunity and InSight are real, with sources and credits available below.', 'note'));
+    panel.append(node('p', 'Opportunity and InSight: scientific legacy preserved through real NASA records. The survivor and rescue narrative is an original fictional frame, not historical mission evidence.'));
+    panel.append(this.legacy('LEGACY-OPPORTUNITY'), this.legacy('LEGACY-INSIGHT'));
     const credits = this.credits(); credits.open = true;
-    p.append(credits, button('Back to THE END', () => this.showComplete()), button('RESTART', () => this.actions.start(true), 'primary'));
+    panel.append(credits, button('Back to THE END', () => this.showComplete()), button('RESTART', () => this.actions.start(true)));
   }
 
   private credits(): HTMLDetailsElement {

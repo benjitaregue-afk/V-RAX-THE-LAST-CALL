@@ -14,12 +14,13 @@ async function pose(page: Page): Promise<Pose> {
     return { t: performance.now(), x: Number(d.x), z: Number(d.z), yaw: Number(d.yaw), pitch: Number(d.pitch), stage: d.stage ?? '', mode: d.mode ?? '' };
   });
 }
-async function start(page: Page): Promise<void> {
+async function start(page: Page, calm = false): Promise<void> {
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'Enter archive', exact: true })).toBeVisible();
   await page.getByText('Settings', { exact: true }).click();
   await page.getByLabel('Look mode', { exact: true }).selectOption('keyboard');
   await page.getByLabel('Quality', { exact: true }).selectOption('low');
+  if(calm){await page.getByLabel('Reduced intensity',{exact:true}).check();await page.getByLabel('Text size',{exact:true}).selectOption('1.5');}
   await page.getByRole('button', { name: 'Enter archive', exact: true }).click();
   await skipAwakening(page);
 }
@@ -82,9 +83,10 @@ function errors(page: Page): string[] {
 }
 
 // Physical Opportunity-first route; story cannot end at the final scientific terminal.
-test('survivor awakens, restores both missions, walks to observation and is rescued', async ({ page }) => {
+for(const calm of [false,true]) test(`survivor restores both missions and reaches the white rescue ending (${calm?'reduced intensity and 150% text':'natural cinematic'})`, async ({ page }) => {
   const runtimeErrors=errors(page);await mkdir(shots,{recursive:true});await mkdir(phaseShots,{recursive:true});
-  await start(page);
+  const finaleShots=`output/playwright/overhaul/finale/${calm?'calm':'normal'}`;await mkdir(finaleShots,{recursive:true});
+  await start(page,calm);
   await page.screenshot({path:`${shots}/e2e-airlock.png`});
   await expect(page.locator('.interaction')).toBeEmpty();
   await page.keyboard.press('KeyE');
@@ -107,7 +109,8 @@ test('survivor awakens, restores both missions, walks to observation and is resc
   await expect(page.getByRole('heading',{name:/CHAPTER II.*BENEATH THE SILENCE/s})).toBeVisible();
   await expect(page.locator('#scene')).toHaveAttribute('data-cinematic','chapterTwo');
   await page.waitForTimeout(3200);
-  expect(await page.locator('#ui').evaluate(e=>Number((e as HTMLElement).style.getPropertyValue('--recovery')))).toBeLessThan(0.2);
+  const recovery=await page.locator('#ui').evaluate(e=>Number((e as HTMLElement).style.getPropertyValue('--recovery')));
+  if(calm)expect(recovery).toBe(1);else expect(recovery).toBeLessThan(0.2);
   await page.screenshot({path:`${shots}/e2e-chapter-two.png`});
   await finishSequence(page,/CHAPTER II.*BENEATH THE SILENCE/s);
   await expect(page.locator('#scene')).toHaveAttribute('data-stage','CHAPTER_TWO');
@@ -180,6 +183,11 @@ test('survivor awakens, restores both missions, walks to observation and is resc
   await path(page,[[2.7,15],[2.7,23.4]]);await walk(page,0,26,true);
   await expect(page.locator('#scene')).toHaveAttribute('data-stage','RESCUE');
   await expect(page.locator('#scene')).toHaveAttribute('data-mode','CINEMATIC');
+  if(!calm){
+    // A stored RESCUE checkpoint must replay its approach, never jump to the ending.
+    await page.reload();await page.getByRole('button',{name:'Continue saved game',exact:true}).click();
+    await expect(page.locator('#scene')).toHaveAttribute('data-cinematic','rescue');
+  }
   await expect(page.locator('#scene')).toHaveAttribute('data-rescue-visible','true');
   await expect(page.locator('#scene')).toHaveAttribute('data-searchlight','true');
   const rescueBefore=Number(await page.locator('#scene').getAttribute('data-rescue-z'));
@@ -187,11 +195,14 @@ test('survivor awakens, restores both missions, walks to observation and is resc
   const rescueAfter=Number(await page.locator('#scene').getAttribute('data-rescue-z'));
   expect(Math.abs(rescueAfter-rescueBefore)).toBeGreaterThan(0.05);
   expect(Number(await page.locator('#scene').getAttribute('data-searchlight-direction-z'))).toBeLessThan(0);
+  await expect(page.locator('#scene')).toHaveAttribute('data-production-visuals',/rescue-one/);
+  expect(Number(await page.locator('#scene').getAttribute('data-rescue-beam-end-z'))).toBeGreaterThanOrEqual(30.34);
   await page.screenshot({path:`${shots}/e2e-rescue-window.png`});
+  await page.screenshot({path:`${finaleShots}/approach.png`});
   await expect(page.locator('.cinematic-line')).toContainText('approaching spacecraft');
   const spokenBeforeRadio=Number(await page.locator('#scene').getAttribute('data-spoken-lines'));
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await expect(page.locator('.cinematic-line')).toHaveText('Unidentified survivor aboard the vessel, this is Rescue One. We have visual confirmation. Hold your position.');
+  if(calm)await page.getByRole('button',{name:'Continue',exact:true}).click();
+  await expect(page.locator('.cinematic-line')).toHaveText('Unidentified survivor aboard the vessel, this is Rescue One. We have visual confirmation. Hold your position.',{timeout:10000});
   // On this machine the headed run also verifies native speech's real onstart,
   // without substituting a mock voice. Captions remain required on every browser.
   if(process.env.VORAX_HEADED){
@@ -201,20 +212,56 @@ test('survivor awakens, restores both missions, walks to observation and is resc
     await test.info().attach('rescue-radio-native-speech',{body:JSON.stringify({availableVoices,spokenBeforeRadio,spokenAfterRadio:await page.locator('#scene').getAttribute('data-spoken-lines'),status:await page.locator('#scene').getAttribute('data-speech')}),contentType:'application/json'});
   }
   const spokenBeforeReply=Number(await page.locator('#scene').getAttribute('data-spoken-lines'));
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
-  await expect(page.locator('.cinematic-line')).toHaveText("I'm here.");
+  if(calm)await page.getByRole('button',{name:'Continue',exact:true}).click();
+  await expect(page.locator('.cinematic-line')).toHaveText("I'm here.",{timeout:12000});
   if(process.env.VORAX_HEADED)await expect.poll(async()=>Number(await page.locator('#scene').getAttribute('data-spoken-lines'))).toBeGreaterThan(spokenBeforeReply);
-  await page.getByRole('button',{name:'Continue',exact:true}).click();
+  if(calm)await page.getByRole('button',{name:'Skip sequence',exact:true}).click();
+  await expect(page.locator('#scene')).toHaveAttribute('data-cinematic','fade',{timeout:5000});
+  await expect(page.getByRole('button',{name:'Skip transition',exact:true})).toBeVisible();
+  await expect(page.locator('#scene')).toHaveAttribute('data-rescue-calm',String(calm));
+  if(calm)await expect(page.locator('.rescue-glare-radial')).toHaveCSS('display','none');
+  if(!calm){
+    // Exercise the suspension handler without changing any story state or clock.
+    await page.waitForTimeout(450);await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+    await expect(page.locator('#scene')).toHaveAttribute('data-cinematic-suspended','true');
+    const frozen=await page.locator('#scene').evaluate(e=>[e.dataset.rescueExposure,e.dataset.searchlightIntensity]);
+    await page.waitForTimeout(250);
+    expect(await page.locator('#scene').evaluate(e=>[e.dataset.rescueExposure,e.dataset.searchlightIntensity])).toEqual(frozen);
+    await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+  }
+  let lastExposure=0;let captured=false;const exposureSamples:number[]=[];const endingDeadline=Date.now()+7000;
+  while(Date.now()<endingDeadline){
+    const frame=await page.locator('#scene').evaluate(e=>({exposure:Number(e.dataset.rescueExposure),stage:e.dataset.stage,intensity:Number(e.dataset.searchlightIntensity),beam:Number(e.dataset.rescueBeamEndZ)}));
+    expect(frame.exposure).toBeGreaterThanOrEqual(lastExposure-0.00002);expect(frame.exposure).toBeLessThanOrEqual(1);
+    expect(frame.intensity).toBeLessThanOrEqual(12.001);expect(frame.beam).toBeGreaterThanOrEqual(30.34);
+    exposureSamples.push(frame.exposure);lastExposure=frame.exposure;
+    if(!captured&&frame.exposure>=.45&&frame.exposure<.9){
+      captured=true;await page.screenshot({path:`${finaleShots}/light-transition.png`});
+      if(calm){await page.getByRole('button',{name:'Skip transition',exact:true}).click();}
+    }
+    if(frame.stage==='COMPLETE')break;
+    await page.waitForTimeout(70);
+  }
+  expect(captured,'The light must visibly motivate the final white frame').toBe(true);
+  await test.info().attach('rescue-exposure-samples',{body:JSON.stringify({calm,exposureSamples,focusTest:'synthetic blur/focus handler events, normal only'}),contentType:'application/json'});
   await expect(page.getByRole('heading',{name:'THE END',exact:true})).toBeVisible();
-  await expect(page.locator('.overlay')).toHaveCSS('background-color','rgb(0, 0, 0)');
+  await expect(page.locator('.overlay')).toHaveCSS('background-color','rgb(255, 255, 255)');
+  await expect(page.getByRole('heading',{name:'THE END',exact:true})).toHaveCSS('color','rgb(0, 0, 0)');
   await expect(page.locator('#scene')).toHaveAttribute('data-stage','COMPLETE');
+  await expect(page.locator('#scene')).toHaveAttribute('data-rescue-exposure','1.00000');
+  const endBox=await page.getByRole('heading',{name:'THE END',exact:true}).boundingBox();const viewport=page.viewportSize()!;
+  expect(Math.abs(endBox!.x+endBox!.width/2-viewport.width/2)).toBeLessThan(3);expect(Math.abs(endBox!.y+endBox!.height/2-viewport.height/2)).toBeLessThan(3);
   await page.screenshot({path:`${shots}/e2e-complete.png`});
+  await page.screenshot({path:`${finaleShots}/the-end.png`});
+  if(!calm){await page.reload();await page.getByRole('button',{name:'Continue saved game',exact:true}).click();await expect(page.locator('.overlay')).toHaveCSS('background-color','rgb(255, 255, 255)');}
   await page.getByRole('button',{name:'CREDITS',exact:true}).click();
   await expect(page.getByRole('heading',{name:'CREDITS',exact:true})).toBeVisible();
   await expect(page.getByText('Not an official NASA product. NASA does not endorse this project.',{exact:true})).toBeVisible();
   await expect(page.getByText('PIA05584 — NASA/JPL/Cornell. PIA25680 — NASA/JPL-Caltech. Credits, transformations and usage conditions are displayed with each record.',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'RESTART',exact:true}).click();
   await expect(page.locator('#scene')).toHaveAttribute('data-stage','ARRIVAL');
+  await expect(page.locator('#scene')).toHaveAttribute('data-rescue-exposure','0.00000');
+  await expect(page.locator('#scene')).toHaveAttribute('data-rescue-visible','false');
   await expect(page.getByRole('heading',{name:/PROLOGUE.*THE AWAKENING/s})).toBeVisible();
   expect(runtimeErrors).toEqual([]);
 });

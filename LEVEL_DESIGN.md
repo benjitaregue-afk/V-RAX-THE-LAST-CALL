@@ -4,6 +4,8 @@ Current PZ-02 presentation note (2026-11-15): Witness in Stone's original physic
 
 Approved rollout now extends the optical reader to other existing terminals and the journal. All physical terminal locations, routes, collision and prerequisites remain unchanged; the journal map is drawn directly from RECTS and clearly labelled fictional. The earlier presentation-only checkpoint was approved.
 
+The completed rescue still begins only after the physical OBSERVATION walk reaches z≥25. The existing craft approaches on its five-second path; spotlight scatter ends at z=30.35 beyond the z=29.98 window. Its slow sweep and later white exposure change presentation only. No window, route, collision, terminal or completed-zone mesh was rebuilt. Black THE END on white follows the motivated light transition.
+
 ## Extensión vigente: observation deck
 
 Se mantienen los cinco espacios anteriores, sus objetos y colisiones. Se añade la cubierta OBSERVATION, X −6…6 / Z 22…30, con suelo Y=0 y techo Y=3.4 m. Conector desde RELAY: X 1.8…4.8 / Z 19…22. El paso es lateral para evitar el núcleo del relay existente; ruta segura desde consola: (2.7,15) → (2.7,23.4) → (0,26).

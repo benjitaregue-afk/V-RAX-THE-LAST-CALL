@@ -1,0 +1,44 @@
+/* Rescue light is a visual continuation of the actual spotlight, never a state gate. */
+#ui { --rescue-glare: 0; --rescue-glare-radial: 0; --rescue-glare-x: 50%; --rescue-glare-y: 40%; }
+.rescue-glare { position: absolute; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; }
+.rescue-glare-radial,.rescue-glare-white { position: absolute; inset: 0; pointer-events: none; }
+.rescue-glare-radial { opacity: var(--rescue-glare-radial); background: radial-gradient(ellipse at var(--rescue-glare-x) var(--rescue-glare-y),#fffef2f2 0%,#fffef0b3 9%,#fffffc55 25%,#ffffff00 58%); }
+.rescue-glare-white { background: #fff; opacity: var(--rescue-glare); }
+#ui > .caption-box,#ui > .toast { z-index: 3; }
+#ui > .overlay { z-index: 4; }
+/* Let the motivated white exposure reach the whole frame rather than retaining black bars. */
+#ui .cinematic-overlay { background: linear-gradient(to bottom,rgba(2,6,8,calc(.439 * (1 - var(--rescue-glare)))),transparent 25% 55%,rgba(2,7,12,calc(.522 * (1 - var(--rescue-glare))))); }
+.rescue-transition-overlay { background: transparent; padding: 24px; align-items: end; }
+.rescue-transition-panel { width: 100%; max-height: none; padding: 0; border: 0; background: transparent; box-shadow: none; text-align: center; }
+.rescue-transition-panel:focus,.rescue-transition-panel:focus-visible { outline: none; }
+.rescue-transition-skip { min-height: 44px; margin: 0; padding: 9px 17px; background: #ffffffe0; color: #15212a; border: 1px solid #6e7a82a6; font-size: .8em; letter-spacing: .04em; }
+.rescue-transition-skip:hover { background: #fff; border-color: #263b48; }
+.rescue-transition-skip:focus-visible { outline: 2px solid #172e3a; outline-offset: 4px; }
+
+/* A clean white frame, with one typographic endpoint and quiet functional actions. */
+.ending-overlay { background: #fff; color: #0a1116; }
+.white-ending-overlay { padding: 0; }
+.white-end-panel { position: relative; display: grid; place-items: center; width: 100%; height: 100dvh; max-height: 100dvh; padding: 0; overflow: hidden; border: 0; background: transparent; box-shadow: none; color: #0a1116; text-align: center; }
+.white-end-panel:focus,.white-end-panel:focus-visible { outline: none; }
+.white-end-panel h1 { margin: 0; padding-left: .22em; color: #000; font-family: 'Helvetica Neue',Arial,sans-serif; font-size: clamp(2.5em,5vw,4.4em); font-weight: 300; line-height: 1.15; letter-spacing: .22em; }
+.ending-actions { position: absolute; bottom: clamp(25px,5vh,60px); left: 50%; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: min(90%,400px); transform: translateX(-50%); }
+.ending-actions button { min-height: 44px; margin: 0; padding: 9px 16px; border: 1px solid #6e808b66; background: transparent; color: #253945; font: 500 .69em/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing: .12em; }
+.ending-actions button:hover { background: #edf2f4; border-color: #344c5a; }
+.ending-actions button:focus-visible { outline: 2px solid #1d3b4c; outline-offset: 4px; }
+
+/* Credits keep the original scientific explanations and links, on the same white surface. */
+.ending-credits-overlay { padding: clamp(15px,3vw,34px); }
+.ending-credits-panel { width: min(1000px,100%); padding: clamp(20px,4vw,42px); border: 1px solid #c2cdd3; background: #fff; box-shadow: none; color: #14232c; line-height: 1.65; scrollbar-color: #768d9b #f0f3f5; }
+.ending-credits-panel h1 { margin: 0 0 18px; color: #10232e; font-weight: 400; letter-spacing: .12em; }
+.ending-credits-panel :is(h2,h3,h4) { color: #132b39; font-weight: 500; }
+.ending-credits-panel :is(.layer,.note,.credit,small) { color: #405d6c; }
+.ending-credits-panel .ending-line { color: #183341; font-size: 1.25em; }
+.ending-credits-panel .legacy { border-color: #bdcbd3; }
+.ending-credits-panel a { color: #184b68; text-decoration-thickness: 1px; }
+.ending-credits-panel details { border-color: #b9c9d2; background: #f6f8f9; }
+.ending-credits-panel summary { color: #193c50; }
+.ending-credits-panel button { color: #1c3c4e; border-color: #7f9baa; background: #f6f9fa; }
+.ending-credits-panel button:hover { color: #102b3b; background: #e9f0f4; }
+.ending-credits-panel :focus-visible { outline: 2px solid #164969; outline-offset: 4px; }
+#ui[data-rescue-glare-calm=true] .rescue-glare-radial { display: none; }
+@media(prefers-reduced-motion:reduce) { .rescue-glare-radial { display: none; } }

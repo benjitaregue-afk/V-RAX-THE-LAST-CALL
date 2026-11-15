@@ -18,7 +18,11 @@ Continue from the saved master and this checkout. Recovery commits: `fe7c70b` (c
 
 **Source preservation:** live and saved Blender production data match in the read-only audit, but Blender still reports `is_dirty=true` for an undetermined reason. No source/GLB was changed in this UI phase; do not overwrite the live state. See `output/playwright/overhaul/sourcecheck/comparison.json`.
 
-**Next:** implement the spotlight-motivated white rescue finale with black THE END, restart and reduced intensity, then integrated QA. No repeat approval gate is required for the approved optical direction. Keep the completed r2/r3 station and Rescue One intact; never run build_station.py.
+**Finale delivered:** existing Rescue One and approach preserved; real spotlight now searches/settles, then motivates a smooth full-screen white transition and centered black THE END. Calm mode uses a uniform dissolve; Skip transition, credits, COMPLETE/RESCUE reload and restart are verified. Runtime/UI files changed; no Blender or GLB export was needed.
+
+**Final executed QA:** 90 unit / 11 content / typecheck / production build / 18 browser scenarios PASS. Actual natural and reduced-intensity + 150% routes, source/credit checks, hand/control regressions and real in-game captures are in `CINEMATIC_OVERHAUL.md` and `output/playwright/overhaul/finale/`. The 30 s Chrome/M4 stationary smoke profile is not minimum-hardware acceptance.
+
+**Remaining:** human final visual/science review, fresh-profile duration/comfort, minimum hardware and Safari/Firefox. Preserve the live Blender unsaved state and completed r2/r3 assets; never run build_station.py. No publish or submission is authorized by this delivery.
 
 ## Historical r3 handoff
 

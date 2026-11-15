@@ -142,3 +142,7 @@ PZ-02 alone uses Archive log/Reconstruction modes, four original evidence record
 ## Approved optical rollout — 2026-11-15
 
 The user approved the revised direction. The same controls/presentation now cover all puzzle terminals and records; settings retain native selects. Journal Mission/Records/Ship log preserves evidence unlocks and the authoritative fictional ship map. Question text, options, validation, sources and stage guards are unchanged. H focus, disabled solved choices, immediate solved explanations and stale-error cleanup are verified. Scientific text remains stable; reduced motion removes projection motion; large text stacks content. Exact executed results: CINEMATIC_OVERHAUL.md.
+
+## White rescue endpoint — 2026-11-15
+
+The original observation-deck walk and rescue radio/reply now lead to a spotlight-motivated white exposure, then black THE END on white. A fresh clock after dialogue controls presentation; Skip transition is an explicit alternative completion route. Calm settings/OS motion preference use stable searchlight tracking, a slower uniform dissolve and stable chapter lighting. RESCUE reload replays, COMPLETE reload restores white, and restart clears light/actor state while preserving settings. No prerequisite, puzzle answer, scientific record, save schema or physical route changed. Executed normal/calm routes and limits: CINEMATIC_OVERHAUL.md.

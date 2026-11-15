@@ -1,13 +1,15 @@
 # VØRAX — THE LAST SIGNAL
 
-**Estado actual: implementación narrativa jugable en greybox, autorizada por el usuario.** Despertar → Opportunity → InSight → baliza → cubierta de observación → rescate 3D → THE END. Arte final y animaciones Blender reservados a Claude. No se ha publicado el proyecto.
+**Estado actual: juego 3D con arte Blender r4, manos animadas y dirección holográfica aprobada por el usuario.** Despertar → Opportunity → InSight → baliza → cubierta de observación → Rescue One → exposición blanca → THE END. La extensión de interfaces y el final pasaron la verificación automatizada; revisión humana final pendiente. El proyecto sigue siendo local.
 
 ```sh
 npm ci       # si faltan dependencias
 npm run dev -- --host 127.0.0.1
 ```
 
-Abrir http://127.0.0.1:5173/. WASD, ratón o flechas, Shift sprint, F linterna, E interacción, Esc pausa. Ver [PROGRESS.md](PROGRESS.md) para resultados ejecutados y límites; [CLAUDE_HANDOFF.md](CLAUDE_HANDOFF.md) para integración de arte y verificación.
+Abrir http://127.0.0.1:5173/. WASD, ratón o flechas, Shift sprint, F linterna, E interacción, J diario, Esc pausa. Tab recorre la interfaz; flechas/Espacio eligen tarjetas y Enter confirma. Para probar la compilación de producción: `npm run build`, después `npm run preview -- --host 127.0.0.1`, y abrir http://127.0.0.1:4173/.
+
+Estado, capturas y pruebas actuales: [CINEMATIC_OVERHAUL.md](CINEMATIC_OVERHAUL.md). Fuentes editables y precauciones de continuación: [ART_HANDOFF.md](ART_HANDOFF.md). No ejecutar `assets/blender/scripts/build_station.py`: regenera arte anterior. [PROGRESS.md](PROGRESS.md) conserva la verificación histórica de gameplay.
 
 ## Historial de planificación
 
