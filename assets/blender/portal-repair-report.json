@@ -1,0 +1,23 @@
+{
+  "offset_m": 0.015,
+  "portals": [
+    "D0",
+    "D1",
+    "D2",
+    "ARCH_W"
+  ],
+  "objects": {
+    "ENV_HUB": {
+      "moved_vertices": 632,
+      "vertices": 13012,
+      "faces": 5531,
+      "uv_preserved": true
+    },
+    "DET_HUB": {
+      "moved_vertices": 296,
+      "vertices": 35510,
+      "faces": 23109,
+      "uv_preserved": true
+    }
+  }
+}

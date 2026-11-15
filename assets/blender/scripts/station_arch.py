@@ -307,9 +307,10 @@ def portal(z, x, zz, yaw, label, sub, rng):
     z.push(plan_frame(x, zz, yaw))
     for sx in (-1, 1):
         z.box((0.5, 0.56, CEIL), (sx * 1.25, 0, CEIL / 2), "struct", bevel=0.03)
-        z.box((0.07, 0.62, 2.5), (sx * 1.035, 0, 1.25), "steel", bevel=0.008)
+        # Stand the inner trim 15 mm proud of the pillar/gusset plane (x=±1).
+        z.box((0.07, 0.62, 2.5), (sx * 1.020, 0, 1.25), "steel", bevel=0.008)
         for k in range(5):
-            z.box((0.08, 0.64, 0.16), (sx * 1.035, 0, 0.22 + k * 0.5), "hazard")
+            z.box((0.08, 0.64, 0.16), (sx * 1.020, 0, 0.22 + k * 0.5), "hazard")
         z.prism([(sx * 1.0, 2.5), (sx * 0.64, 2.5), (sx * 1.0, 2.14)], -0.3, 0.3, "struct", M=XZY)  # corner gusset
         for sy in (-1, 1):
             z.rod((sx * 1.3, sy * 0.33, 0.25), (sx * 1.3, sy * 0.33, 2.3), 0.035, "steel", segs=8)
@@ -318,7 +319,7 @@ def portal(z, x, zz, yaw, label, sub, rng):
             z.box((0.12, 0.012, 0.08), (sx * 1.25, sy * 0.328, 1.4), "emit_cyan")
             z.box((0.12, 0.012, 0.05), (sx * 1.25, sy * 0.328, 1.26), "cavity")
     z.box((2.0, 0.56, 0.9), (0, 0, 2.95), "struct", bevel=0.03)
-    z.box((2.07, 0.62, 0.07), (0, 0, 2.535), "steel", bevel=0.008)
+    z.box((2.07, 0.62, 0.07), (0, 0, 2.520), "steel", bevel=0.008)
     z.box((2.0, 0.6, 0.02), (0, 0, 0.01), "steel")
     for sy in (-1, 1):
         z.box((1.7, 0.05, 0.4), (0, sy * 0.3, 3.0), "cavity", bevel=0.01)
