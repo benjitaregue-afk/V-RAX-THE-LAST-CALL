@@ -1,0 +1,28 @@
+{
+  "name": "vorax-the-last-signal",
+  "private": true,
+  "version": "0.1.0",
+  "description": "VØRAX: THE LAST SIGNAL — a short first-person 3D archive mystery built on real NASA mission records.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "validate:content": "vitest run tests/unit/content.test.ts",
+    "assets:hash": "node scripts/hash-assets.mjs",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173 --strictPort",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@babylonjs/core": "9.36.0",
+    "@babylonjs/loaders": "9.36.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "26.6.6",
+    "typescript": "7.0.2",
+    "vite": "8.3.8",
+    "vitest": "5.1.0"
+  }
+}

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+.superpowers/
+*.blend1
+.DS_Store
+
+# Local QA artifacts (retained on disk, not game assets)
+.playwright-cli/
+output/playwright/
