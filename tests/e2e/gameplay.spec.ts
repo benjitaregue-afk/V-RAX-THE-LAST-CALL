@@ -6,6 +6,7 @@ import {skipAwakening,finishSequence,reachMonologue} from './cinematics';
 // no teleports, imported save stages, reducer dispatch, or mutable debug APIs.
 type Pose = { t: number; x: number; z: number; yaw: number; pitch: number; stage: string; mode: string };
 const shots = 'output/playwright';
+const phaseShots = 'output/playwright/overhaul/phase3';
 const angle = (value: number): number => Math.atan2(Math.sin(value), Math.cos(value));
 async function pose(page: Page): Promise<Pose> {
   return page.locator('#scene').evaluate((element) => {
@@ -66,10 +67,9 @@ async function resume(page: Page): Promise<void> {
   await expect(page.locator('#scene')).toHaveAttribute('data-mode', 'PLAYING');
 }
 async function solve(page: Page, id: string, answers: Record<string, string>, label: string, stage: string): Promise<void> {
-  if(id==='PZ-02') await page.getByRole('button',{name:'Reconstruction',exact:true}).click();
+  if(id!=='PZ-00') await page.getByRole('button',{name:'Reconstruction',exact:true}).click();
   for (const [field, value] of Object.entries(answers)) {
-    if(id==='PZ-02') await page.locator(`input[type="radio"][name="${field}"][value="${value}"]`).check();
-    else await page.locator(`[id="${id}-${field}"]`).selectOption(value);
+    await page.locator('.panel').locator(`input[type="radio"][name="${field}"][value="${value}"]`).check();
   }
   await page.getByRole('button', { name: label, exact: true }).click();
   await expect(page.locator('#scene')).toHaveAttribute('data-stage', stage);
@@ -83,7 +83,7 @@ function errors(page: Page): string[] {
 
 // Physical Opportunity-first route; story cannot end at the final scientific terminal.
 test('survivor awakens, restores both missions, walks to observation and is rescued', async ({ page }) => {
-  const runtimeErrors=errors(page);await mkdir(shots,{recursive:true});
+  const runtimeErrors=errors(page);await mkdir(shots,{recursive:true});await mkdir(phaseShots,{recursive:true});
   await start(page);
   await page.screenshot({path:`${shots}/e2e-airlock.png`});
   await expect(page.locator('.interaction')).toBeEmpty();
@@ -95,7 +95,7 @@ test('survivor awakens, restores both missions, walks to observation and is resc
   await finishSequence(page,/CHAPTER I.*THE FORGOTTEN/s);
   await path(page,[[0,-3],[0,1],[0,6.5],[8.5,6.5],[10.9,7]]);
   await inspect(page,12,7,'PZ-02');
-  await page.getByText("PIA05584 — 'Berries' and Rock Share Common Origins",{exact:true}).first().click();
+  await page.getByRole('button',{name:"PIA05584 — 'Berries' and Rock Share Common Origins",exact:true}).click();
   const record=page.locator('[data-record="R-PIA05584"]');const picture=record.locator('img');
   await expect(picture).toBeVisible();
   await expect.poll(async()=>picture.evaluate(image=>(image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
@@ -113,16 +113,47 @@ test('survivor awakens, restores both missions, walks to observation and is resc
   await expect(page.locator('#scene')).toHaveAttribute('data-stage','CHAPTER_TWO');
   await path(page,[[8.5,6.5],[0,6.5],[-8.5,6.5],[-10.9,7]]);
   await inspect(page,-12,7,'PZ-01');
-  await page.getByText('InSight lander — catalog record',{exact:true}).first().click();
+  await page.getByRole('button',{name:"One of InSight's last images",exact:true}).click();
+  const insightImage=page.locator('[data-record="R-INSIGHT-IMAGE"]');
+  await expect(insightImage.locator('img')).toBeVisible();
+  await expect.poll(async()=>insightImage.locator('img').evaluate(image=>(image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  await expect(insightImage).toContainText('PIA25680');
+  await expect(insightImage.locator('figcaption')).toHaveText("One of InSight's last images, 11 December 2022 (sol 1436). Credit: NASA/JPL-Caltech.");
+  await insightImage.locator('figcaption').scrollIntoViewIfNeeded();
+  await expect(insightImage.locator('figcaption')).toBeVisible();
+  await page.screenshot({path:`${phaseShots}/insight-image.png`});
+  await page.getByRole('button',{name:'InSight lander — catalog record',exact:true}).click();
   await expect(page.locator('[data-record="R-INSIGHT"]')).toContainText('2018-042A');
   await expect(page.locator('[data-record="R-INSIGHT"] a').first()).toHaveAttribute('href',/2018-042A/);
   await solve(page,'PZ-01',{instrument:'solar',records:'energy',purpose:'power'},'Restore record','CHAPTER_TWO');
   await expect(page.getByText('Check the evidence and try again.',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Hint (H)',exact:true}).click();await expect(page.locator('.hint')).toContainText('NASA catalog');
   await solve(page,'PZ-01',{instrument:'seis',records:'motion',purpose:'interior'},'Restore record','INSIGHT_RESTORED');
+  await expect(page.locator('.panel [aria-invalid="true"]')).toHaveCount(0);
   await expect(page.getByRole('heading',{name:'InSight — what it leaves behind',exact:true})).toBeVisible();
   await page.reload();await page.getByRole('button',{name:'Continue saved game',exact:true}).click();
   await expect(page.locator('#scene')).toHaveAttribute('data-stage','INSIGHT_RESTORED');expect((await pose(page)).x).toBeCloseTo(-9,1);
+  await page.keyboard.press('KeyJ');
+  await expect(page.getByRole('heading',{name:'Archive journal',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Records',exact:true}).click();
+  await page.getByRole('button',{name:"About the 'sounds' of SEIS",exact:true}).click();
+  const seisRecord=page.locator('[data-record="R-SEIS-SOUND"]');
+  await expect(seisRecord).toContainText('Sped up and slightly processed to be audible (sonification)');
+  const mechanism=seisRecord.getByText("MECHANISM: When NASA shares the 'sound' of a marsquake, it is a sonification: SEIS ground-motion data, sped up and processed until people can hear it.",{exact:true});
+  await mechanism.scrollIntoViewIfNeeded();await expect(mechanism).toBeVisible();
+  await expect(seisRecord).toContainText('A microphone recording of sound in the air');
+  await expect(seisRecord).toContainText('This archive plays no NASA audio. Every sound in the station was synthesized for this fictional story.');
+  await page.screenshot({path:`${phaseShots}/journal-seis.png`});
+  const seisSource=seisRecord.getByRole('link',{name:'Primary source · N06',exact:true});
+  await expect(seisSource).toHaveAttribute('href','https://www.jpl.nasa.gov/news/nasas-insight-hears-peculiar-sounds-on-mars/');
+  await seisSource.scrollIntoViewIfNeeded();await expect(seisSource).toBeVisible();
+  await seisRecord.getByText('Usage conditions and evidence IDs',{exact:true}).click();
+  const usage=seisRecord.getByText('NASA content, used for factual educational purposes with credit. No NASA endorsement is implied. See NASA Images and Media Guidelines.',{exact:true});
+  await usage.scrollIntoViewIfNeeded();await expect(usage).toBeVisible();
+  await expect(seisRecord).toContainText('F08 · F13');
+  await expect(page.locator('#scene')).toHaveAttribute('data-stage','INSIGHT_RESTORED');
+  await page.screenshot({path:`${phaseShots}/journal-seis-source.png`});
+  await resume(page);
   await path(page,[[-8.5,6.5],[0,6.5],[0,14.9]]);await inspect(page,0,16,'PZ-03');
   await expect(page.locator('.diagnostic')).toContainText('LOCAL QUEUE');
   await solve(page,'PZ-03',{'card-seis':'fact','card-queue':'fiction','card-alive':'unsupported'},'Check provenance','READY_TO_PRESERVE');
@@ -264,8 +295,9 @@ test('real controls respect walls, locked door, pause, flashlight and journal', 
   await resume(page);
   await page.keyboard.press('KeyJ');
   await expect(page.getByRole('heading', { name: 'Archive journal', exact: true })).toBeVisible();
-  await page.getByText('Archive map', { exact: true }).click();
-  await expect(page.locator('.map')).toContainText('INSIGHT');
+  const map=page.getByRole('figure',{name:'Archive map',exact:true});
+  await expect(map).toBeVisible();
+  await expect(map).toContainText('INSIGHT');
   await page.keyboard.press('Escape');
   await expect(page.locator('#scene')).toHaveAttribute('data-mode', 'PAUSED');
   expect(runtimeErrors).toEqual([]);

@@ -138,3 +138,7 @@ The first authored industrial glove model and animation direction were approved 
 ## Witness in Stone optical prototype — pending visual approval
 
 PZ-02 alone uses Archive log/Reconstruction modes, four original evidence records and native radio-card groups. Question labels, option IDs, answers and validation are unchanged. Tab/Shift+Tab, native arrow/Space selection, Enter confirmation, H hint and Esc pause remain available. E performs the existing contextual hand gesture before opening; scientific panels hide the hands. Perspective and decorative projection motion turn off with reduced intensity or OS reduced-motion; large text stacks the same evidence. This is a visual-review prototype, not approval to redesign other terminals, HUD or journal. Executed evidence: CINEMATIC_OVERHAUL.md.
+
+## Approved optical rollout — 2026-11-15
+
+The user approved the revised direction. The same controls/presentation now cover all puzzle terminals and records; settings retain native selects. Journal Mission/Records/Ship log preserves evidence unlocks and the authoritative fictional ship map. Question text, options, validation, sources and stage guards are unchanged. H focus, disabled solved choices, immediate solved explanations and stale-error cleanup are verified. Scientific text remains stable; reduced motion removes projection motion; large text stacks content. Exact executed results: CINEMATIC_OVERHAUL.md.

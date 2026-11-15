@@ -27,7 +27,7 @@ async function restoreBackup(page: Page): Promise<void> {
   await expect(page.locator('.interaction')).toContainText('Backup power switch');
   await page.keyboard.press('KeyE');
   await expect(page.locator('.panel')).toHaveAttribute('data-puzzle', 'PZ-00');
-  await page.getByLabel('BACKUP POWER', { exact: true }).selectOption('on');
+  await page.locator('.panel input[type="radio"][name="backup"][value="on"]').check();
   await page.getByRole('button', { name: 'Confirm', exact: true }).click();
   await expect(page.locator('#scene')).toHaveAttribute('data-stage', 'ARCHIVE_OPEN');
 }
@@ -97,7 +97,8 @@ test('missing NASA image keeps the attributed scientific text accessible', async
   await finishSequence(page,/CHAPTER I.*THE FORGOTTEN/s);
   await page.keyboard.press('KeyJ');
   await expect(page.getByRole('heading', { name: 'Archive journal', exact: true })).toBeVisible();
-  await page.getByText("PIA05584 — 'Berries' and Rock Share Common Origins", { exact: true }).first().click();
+  await page.getByRole('button', { name: 'Records', exact: true }).click();
+  await page.getByRole('button', { name: "PIA05584 — 'Berries' and Rock Share Common Origins", exact: true }).click();
   const record = page.locator('[data-record="R-PIA05584"]');
   await expect(record.locator('.image-fallback')).toBeVisible();
   await expect(record.locator('.image-fallback')).toContainText('Image unavailable.');

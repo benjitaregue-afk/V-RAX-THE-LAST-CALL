@@ -106,7 +106,7 @@ test('journal and attributed science remain unobstructed after a real switch int
   await shot(page, 'switch-anticipation');
   await expect(page.locator('.panel')).toHaveAttribute('data-puzzle', 'PZ-00');
   await expect(canvas).toHaveAttribute('data-hand-asset', 'false');
-  await page.getByLabel('BACKUP POWER', { exact: true }).selectOption('on');
+  await page.locator('.panel input[type="radio"][name="backup"][value="on"]').check();
   await page.getByRole('button', { name: 'Confirm', exact: true }).click();
   await expect(canvas).toHaveAttribute('data-stage', 'ARCHIVE_OPEN');
   await page.getByRole('button', { name: 'Return to archive', exact: true }).click();
@@ -116,7 +116,8 @@ test('journal and attributed science remain unobstructed after a real switch int
   await expect(page.getByRole('heading', { name: 'Archive journal', exact: true })).toBeVisible();
   await expect(canvas).toHaveAttribute('data-mode', 'TERMINAL');
   await expect(canvas).toHaveAttribute('data-hand-asset', 'false');
-  await page.locator('summary').filter({ hasText: 'Opportunity rover — catalog record' }).click();
+  await page.getByRole('button', { name: 'Records', exact: true }).click();
+  await page.getByRole('button', { name: 'Opportunity rover — catalog record', exact: true }).click();
   const record = page.locator('[data-record="R-OPPORTUNITY"]');
   await expect(record).toBeVisible();
   await expect(record).toContainText('NASA ARCHIVAL RECORD');

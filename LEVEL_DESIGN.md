@@ -2,6 +2,8 @@
 
 Current PZ-02 presentation note (2026-11-15): Witness in Stone's original physical terminal, reach, collision, coordinates and prerequisites are unchanged. Its isolated optical reader is a screen-space projection with restrained perspective; it does not create world geometry, block another route or require a new interaction location. Other terminals and the journal retain their existing presentation pending visual approval. Actual tests and screenshots: CINEMATIC_OVERHAUL.md.
 
+Approved rollout now extends the optical reader to other existing terminals and the journal. All physical terminal locations, routes, collision and prerequisites remain unchanged; the journal map is drawn directly from RECTS and clearly labelled fictional. The earlier presentation-only checkpoint was approved.
+
 ## Extensión vigente: observation deck
 
 Se mantienen los cinco espacios anteriores, sus objetos y colisiones. Se añade la cubierta OBSERVATION, X −6…6 / Z 22…30, con suelo Y=0 y techo Y=3.4 m. Conector desde RELAY: X 1.8…4.8 / Z 19…22. El paso es lateral para evitar el núcleo del relay existente; ruta segura desde consola: (2.7,15) → (2.7,23.4) → (0,26).

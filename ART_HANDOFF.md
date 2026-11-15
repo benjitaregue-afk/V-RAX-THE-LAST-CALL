@@ -14,7 +14,11 @@ Continue from the saved master and this checkout. Recovery commits: `fe7c70b` (c
 
 **Current UI checkpoint:** the user APPROVED the revised Witness in Stone optical projection, answering “Aprobar esta dirección” on 2026-11-15. `42edfe0` preserves the approved prototype and its 90 unit / 16 browser passing checks. The earlier dashboard design (`be5e342`) remains rejected. See `CINEMATIC_OVERHAUL.md` for actual screenshots, tests and limitations. Science, puzzle logic, Blender sources and GLBs are unchanged in this UI revision.
 
-**Next:** extend the approved optical language to the remaining records, terminals, journal, mission information and dialogue; test that phase before implementing the white rescue finale and final integrated QA. No repeat visual approval gate is required for the already approved direction. Keep the completed r2/r3 station and Rescue One intact; never run build_station.py.
+**Phase 3 delivered:** the approved optical language now covers all terminals, standalone records, journal Mission/Records/Ship log, mission visor and narrative channels. Original science, images, puzzle rules and unlocks remain intact. 90 unit / 17 browser baseline tests passed; four gameplay/interface checks passed after final accessibility corrections. At 150% / 1280×720 / OS reduced-motion, actual input reached InSight and relay and verified all seven records. Evidence and scope: `CINEMATIC_OVERHAUL.md`.
+
+**Source preservation:** live and saved Blender production data match in the read-only audit, but Blender still reports `is_dirty=true` for an undetermined reason. No source/GLB was changed in this UI phase; do not overwrite the live state. See `output/playwright/overhaul/sourcecheck/comparison.json`.
+
+**Next:** implement the spotlight-motivated white rescue finale with black THE END, restart and reduced intensity, then integrated QA. No repeat approval gate is required for the approved optical direction. Keep the completed r2/r3 station and Rescue One intact; never run build_station.py.
 
 ## Historical r3 handoff
 

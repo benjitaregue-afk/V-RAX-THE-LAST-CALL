@@ -1,10 +1,11 @@
 // Science and narrative are read from reviewed content, never as executable HTML.
-// The first hybrid terminal prototype is scoped to Opportunity pending visual review.
+// Approved optical presentation keeps scientific evidence and gameplay state independent.
 import type { GameState, PuzzleId, ScientificRecord } from '../game/contracts';
 import { stageIndex } from '../game/contracts';
+import { RECTS } from '../world/layout';
 import { project } from '../game/projection';
 import { PUZZLES, puzzleById } from '../content/puzzles';
-import { RECORDS, recordById } from '../content/records';
+import { recordById } from '../content/records';
 import { SOURCES } from '../content/claims';
 import { assetById } from '../content/assets';
 import { BEATS, LEGACY_CARDS, RELAY_DIAGNOSTIC, TEXT } from '../content/narrative';
@@ -15,6 +16,7 @@ import type { SceneBeat } from '../content/story';
 import './style.css';
 import './terminal.css';
 import './hologram.css';
+import './optical-system.css';
 
 export interface UIActions {
   getState(): GameState;
@@ -119,7 +121,8 @@ export class GameUI {
     this.presentationSettings();
     this.closingFrame?.remove(); this.closingFrame = null;
     this.overlay.classList.remove('terminal-overlay', 'hologram-overlay');
-    this.panel.classList.remove('terminal-panel', 'hologram-panel');
+    this.panel.classList.remove('terminal-panel', 'hologram-panel', 'holo-system', 'holo-journal', 'holo-record-panel', 'optical-utility');
+    delete this.panel.dataset.journalMode; delete this.panel.dataset.dialogueChannel;
     delete this.panel.dataset.holoMode; delete this.panel.dataset.holoRecord;
     delete this.panel.dataset.device;
     this.hintAction = null;
@@ -145,7 +148,8 @@ export class GameUI {
 
   hide(): void {
     this.closeTerminalFrame();
-    this.overlay.classList.remove('hologram-overlay'); this.panel.classList.remove('hologram-panel');
+    this.overlay.classList.remove('hologram-overlay'); this.panel.classList.remove('hologram-panel', 'holo-system', 'holo-journal', 'holo-record-panel');
+    delete this.panel.dataset.journalMode; delete this.panel.dataset.dialogueChannel;
     delete this.panel.dataset.holoMode; delete this.panel.dataset.holoRecord;
     this.cinematic = null;
     delete this.panel.dataset.cinematic;
@@ -212,6 +216,7 @@ export class GameUI {
 
   caption(text: string, layer = 'FICTIONAL ARCHIVE SYSTEM'): void {
     window.clearTimeout(this.captionTimer);
+    this.captionBox.dataset.channel = /RADIO|TRANSMISSION/.test(layer) ? 'radio' : /INTERNAL|THOUGHT/.test(layer) ? 'thought' : 'system';
     this.captionBox.replaceChildren(node('span', layer, 'layer'), node('p', text));
     this.captionBox.hidden = !text;
     this.captionTimer = window.setTimeout(() => { this.captionBox.hidden = true; }, 9500);
@@ -225,12 +230,12 @@ export class GameUI {
   }
 
   showLoading(): void {
-    const p=this.show('Loading archive', 'FICTIONAL SETTING · REAL MISSION RECORDS');
+    const p=this.show('Loading archive', 'FICTIONAL SETTING · REAL MISSION RECORDS'); p.classList.add('optical-utility');
     p.append(node('p', 'Preparing the 3D environment, controls and local records…'));
   }
 
   showMenu(hasSave: boolean, notice?: string): void {
-    const p = this.show(TEXT.title, 'FICTIONAL SETTING · REAL MISSION RECORDS');
+    const p = this.show(TEXT.title, 'FICTIONAL SETTING · REAL MISSION RECORDS'); p.classList.add('optical-utility');
     p.append(node('h2', TEXT.subtitle), node('p', SURVIVOR_PREMISE), node('p', BEATS[0]!.caption));
     p.append(node('p', 'Production-art build. Visual polish and performance review are in progress.', 'note'));
     if (notice) p.append(node('p', notice, 'feedback'));
@@ -241,7 +246,7 @@ export class GameUI {
   }
 
   showPause(message?: string): void {
-    const p = this.show('Archive paused', 'FICTIONAL ARCHIVE SYSTEM');
+    const p = this.show('Archive paused', 'FICTIONAL ARCHIVE SYSTEM'); p.classList.add('optical-utility');
     p.append(node('p', project(this.actions.getState()).objective));
     if (message) p.append(node('p', message, 'feedback'));
     const row = node('div', undefined, 'actions');
@@ -253,7 +258,7 @@ export class GameUI {
   }
 
   private confirmNewGame(back: () => void): void {
-    const p = this.show('Start a new game?');
+    const p = this.show('Start a new game?'); p.classList.add('optical-utility');
     p.append(node('p', 'This resets VØRAX progress on this device. Your settings are kept.'), button('Start new game', () => this.actions.start(true), 'primary'), button('Keep current progress', back));
   }
 
@@ -305,69 +310,156 @@ export class GameUI {
 
   showPuzzle(id: PuzzleId): void {
     if (id === 'PZ-02') { this.showOpportunityHologram(); return; }
-    const def = puzzleById(id);
-    const status = project(this.actions.getState()).puzzles[id];
-    const p = this.show(def.title, def.layer);
-    p.dataset.puzzle = id;
-    p.append(node('p', SHIP_CONTEXT[id], 'ship-context'), node('p', def.layerNote, 'note'), node('p', def.instruction));
-    if (id === 'PZ-03') p.append(this.diagnostic());
-    if (status === 'locked') {
-      p.append(node('p', 'Restore the previous record first. Follow the objective in your HUD.', 'feedback'), button(TEXT.resume, () => this.actions.resume()));
-      return;
+    this.showSystemHologram(id);
+  }
+
+  private opticalFrame(titleText: string, layerText: string, identityText: string, device: string): {
+    panel: HTMLElement; projection: HTMLElement; header: HTMLElement; content: HTMLElement; footer: HTMLElement;
+  } {
+    const panel = this.show(titleText, layerText);
+    panel.classList.add('hologram-panel', 'holo-system'); this.overlay.classList.add('hologram-overlay');
+    panel.dataset.device = device;
+    const title = panel.querySelector('h1')!; const layer = panel.querySelector(':scope > .layer')!;
+    const header = node('header', undefined, 'holo-header');
+    const identity = node('div', undefined, 'holo-identity');
+    identity.append(node('span', identityText), node('span', 'LOCAL PROJECTION', 'holo-signal'));
+    const heading = node('div', undefined, 'holo-heading'); heading.append(title, layer); header.append(identity, heading);
+    const projection = node('div', undefined, 'holo-projection'); projection.setAttribute('aria-hidden', 'true');
+    projection.append(node('div', undefined, 'holo-projection-grid'), node('div', undefined, 'holo-projection-scan'));
+    const content = node('section', undefined, 'holo-content'); content.setAttribute('aria-label', titleText);
+    const footer = node('footer', undefined, 'holo-footer');
+    footer.append(node('span', 'FICTIONAL SHIP PROJECTION', 'holo-footer-note'), node('span', device.startsWith('pz-') ? 'TAB focus · ARROWS / SPACE choose · ENTER confirm · H hint · ESC pause' : 'TAB focus · ENTER open · ESC pause', 'holo-key-legend'), button(TEXT.resume, () => this.actions.resume(), 'holo-return'));
+    panel.replaceChildren(projection, header, content, footer);
+    return { panel, projection, header, content, footer };
+  }
+
+  private archiveNavigation(ids: readonly string[], selected: () => string, choose: (id: string) => void): { nav: HTMLElement; refresh(): void } {
+    const nav = node('nav', undefined, 'holo-record-nav'); nav.setAttribute('aria-label', 'Scientific archive records');
+    const controls = new Map<string, HTMLButtonElement>();
+    const shortTitles: Record<string, string> = {
+      'R-INSIGHT': 'InSight catalog', 'R-SEIS-SOUND': 'SEIS signals', 'R-INSIGHT-IMAGE': 'Sol 1436 image',
+      'R-PIA05584': 'PIA05584', 'R-MER-INSTRUMENTS': 'Instruments', 'R-WATER': 'Combined evidence', 'R-OPPORTUNITY': 'Opportunity catalog',
+    };
+    for (const id of ids) {
+      const record = recordById(id);
+      const control = button(shortTitles[id] ?? record.title, () => choose(id), 'holo-record-link');
+      control.setAttribute('aria-label', record.title); control.dataset.recordTarget = id;
+      controls.set(id, control); nav.append(control);
     }
-    const columns = node('div', undefined, 'puzzle-columns');
-    const evidence = node('section', undefined, 'evidence');
-    if (def.recordIds.length) evidence.append(node('h2', 'Evidence library'));
-    for (const recordId of def.recordIds) {
-      const record = recordById(recordId);
-      const d = details(record.title, this.record(record));
-      d.addEventListener('toggle', () => { if (d.open) this.actions.recordViewed(record.id); });
-      evidence.append(d);
-    }
-    const form = node('form', undefined, 'puzzle-form');
+    const refresh = (): void => { for (const [id, control] of controls) control.setAttribute('aria-pressed', String(id === selected())); };
+    refresh(); return { nav, refresh };
+  }
+
+  /** All reconstruction controls remain native radios using the reviewed option ids. */
+  private reconstructionForm(id: PuzzleId): { form: HTMLElement; hint(): void; isSolved(): boolean } {
+    const def = puzzleById(id); const form = node('form', undefined, 'holo-restore-form');
+    form.setAttribute('aria-label', `${def.title} reconstruction`);
+    const body = node('div', undefined, 'holo-restore-body'); const actions = node('div', undefined, 'holo-form-actions');
+    body.append(node('p', def.instruction, 'holo-instruction'));
+    if (id === 'PZ-03') body.append(this.diagnostic());
     const answers: Record<string, string> = { ...(def.initial ?? {}) };
-    const solved = status === 'solved';
+    let solved = project(this.actions.getState()).puzzles[id] === 'solved';
     if (solved) Object.assign(answers, def.solution);
-    const selects = new Map<string, HTMLSelectElement>();
-    for (const field of def.fields) {
-      const l = node('label', undefined, 'puzzle-field');
-      const select = node('select');
-      select.name = field.id; select.id = `${id}-${field.id}`; select.setAttribute('aria-label', field.label);
-      const empty = node('option', 'Choose…'); empty.value = ''; select.append(empty);
-      for (const opt of field.options) { const o = node('option', opt.label); o.value = opt.id; select.append(o); }
-      select.value = answers[field.id] ?? ''; select.disabled = solved;
-      select.addEventListener('change', () => { answers[field.id] = select.value; });
-      l.append(node('span', field.label), select);
-      if (solved && field.reason) l.append(node('small', field.reason));
-      selects.set(field.id, select); form.append(l);
+    const groups = new Map<string, HTMLFieldSetElement>(); const fields = new Map<string, HTMLInputElement[]>();
+    for (const [index, field] of def.fields.entries()) {
+      const group = node('fieldset', undefined, 'holo-question'); group.id = `${id}-${field.id}`; group.disabled = solved;
+      const legend = node('legend'); const count = node('span', String(index + 1).padStart(2, '0'), 'holo-question-number'); count.setAttribute('aria-hidden', 'true');
+      legend.append(count, node('span', field.label)); group.append(legend);
+      const long = field.options.some((option) => option.label.length > 32);
+      const choices = node('div', undefined, `holo-choices ${long ? 'holo-choices-long' : 'holo-choices-short'}`);
+      const radios: HTMLInputElement[] = [];
+      for (const option of field.options) {
+        const label = node('label', undefined, `holo-choice ${long ? 'holo-choice-long' : 'holo-choice-short'}`);
+        const radio = node('input'); radio.type = 'radio'; radio.name = field.id; radio.id = `${id}-${field.id}-${option.id}`;
+        radio.value = option.id; radio.dataset.value = option.id; radio.checked = answers[field.id] === option.id; radio.disabled = solved;
+        label.classList.toggle('is-selected', radio.checked);
+        radio.addEventListener('change', () => {
+          if (!radio.checked) return; answers[field.id] = radio.value;
+          for (const input of radios) input.closest('label')?.classList.toggle('is-selected', input.checked);
+        });
+        label.append(radio, node('span', option.label, 'holo-choice-label')); radios.push(radio); choices.append(label);
+      }
+      group.append(choices); if (solved && field.reason) group.append(node('small', field.reason));
+      fields.set(field.id, radios); groups.set(field.id, group); body.append(group);
     }
-    const result = node('div', undefined, 'feedback'); result.setAttribute('role', 'status');
-    const hint = node('p', '', 'hint');
-    let hintIndex = -1;
-    const hintButton = button('Hint (H)', () => {
-      hintIndex = Math.min(hintIndex + 1, def.hints.length - 1);
-      hint.textContent = def.hints[hintIndex] ?? '';
-    });
-    this.hintAction = () => hintButton.click();
-    if (!solved) {
-      const submit = node('button', def.confirmLabel, 'primary'); submit.type = 'submit';
+    const result = node('div', undefined, 'feedback holo-feedback'); result.id = `${id}-feedback`; result.setAttribute('role', 'status'); result.tabIndex = -1;
+    const hintText = node('p', '', 'hint holo-hint'); let hintIndex = -1;
+    const hint = (): void => { if (!solved) { hintIndex = Math.min(hintIndex + 1, def.hints.length - 1); hintText.textContent = def.hints[hintIndex] ?? ''; } };
+    const hintButton = button('Hint (H)', hint, 'holo-hint-button');
+    const submit = node('button', def.confirmLabel, 'primary holo-submit'); submit.type = 'submit';
+    const markSolved = (): void => {
+      solved = true; form.dataset.solved = 'true'; submit.remove(); hintButton.remove(); hintText.textContent = '';
+      for (const field of def.fields) {
+        const group = groups.get(field.id)!; group.disabled = true;
+        group.removeAttribute('aria-invalid');
+        for (const radio of fields.get(field.id) ?? []) radio.removeAttribute('aria-invalid');
+        if (field.reason && !group.querySelector('small')) group.append(node('small', field.reason));
+      }
+      result.replaceChildren(node('p', def.success));
+      if (id === 'PZ-01') result.append(this.legacy('LEGACY-INSIGHT'));
+      if (id === 'PZ-03' && project(this.actions.getState()).canPreserve) result.append(button('Activate distress beacon', () => this.actions.preserve(), 'primary'), node('p', 'FICTIONAL SHIP SYSTEM: this opens the survivor channel in the story. No real spacecraft is contacted and no data is uploaded.', 'note'));
+    };
+    if (solved) markSolved();
+    else {
+      actions.append(submit, hintButton);
       form.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const validation = this.actions.submit(id, answers);
-        if (validation.solved) { this.showPuzzle(id); return; }
+        event.preventDefault(); const validation = this.actions.submit(id, answers);
+        if (validation.solved) { markSolved(); result.focus({ preventScroll: true }); result.scrollIntoView({ block: 'nearest' }); return; }
         result.replaceChildren(node('p', validation.complete ? 'Check the evidence and try again.' : 'Choose an answer for every field.'));
         for (const text of validation.feedback) result.append(node('p', text));
-        for (const [key, select] of selects) select.setAttribute('aria-invalid', String(validation.fields[key] !== 'correct'));
+        for (const [key, group] of groups) {
+          const invalid = validation.fields[key] !== 'correct'; group.setAttribute('aria-invalid', String(invalid)); group.setAttribute('aria-describedby', result.id);
+          for (const radio of fields.get(key) ?? []) radio.setAttribute('aria-invalid', String(invalid));
+        }
       });
-      form.append(submit, hintButton, hint);
-    } else {
-      result.append(node('p', def.success));
-      if (id === 'PZ-01') result.append(this.legacy('LEGACY-INSIGHT'));
     }
-    form.append(result);
-    if (id === 'PZ-03' && project(this.actions.getState()).canPreserve) form.append(button('Activate distress beacon', () => this.actions.preserve(), 'primary'), node('p', 'FICTIONAL SHIP SYSTEM: this opens the survivor channel in the story. No real spacecraft is contacted and no data is uploaded.', 'note'));
-    form.append(button(TEXT.resume, () => this.actions.resume()));
-    columns.append(evidence, form); p.append(columns);
+    body.append(hintText, result); form.append(body, actions);
+    return {
+      form,
+      hint: () => {
+        if (solved) return;
+        hint(); hintButton.focus({ preventScroll: true }); hintText.scrollIntoView({ block: 'nearest' });
+      },
+      isSolved: () => solved,
+    };
+  }
+
+  private showSystemHologram(id: Exclude<PuzzleId, 'PZ-02'>): void {
+    const def = puzzleById(id);
+    const { panel, projection, header, content, footer } = this.opticalFrame(def.title, def.layer, `VØRAX / ${id === 'PZ-00' ? 'EMERGENCY BUS 00' : id === 'PZ-01' ? 'LISTENING ARCHIVE 01' : 'PROVENANCE RELAY 03'}`, `${id.toLowerCase()}-hologram`);
+    panel.dataset.puzzle = id;
+    const context = details('Archive context', node('p', SHIP_CONTEXT[id]), node('p', def.layerNote)); context.classList.add('holo-context');
+    if (project(this.actions.getState()).puzzles[id] === 'locked') {
+      content.append(node('p', 'Restore the previous record first. Follow the objective in your HUD.', 'feedback'));
+      panel.replaceChildren(projection, header, content, context, footer); return;
+    }
+    const reconstruction = this.reconstructionForm(id);
+    if (!def.recordIds.length) {
+      panel.dataset.holoMode = 'restore'; content.append(reconstruction.form);
+      this.hintAction = reconstruction.hint;
+      panel.replaceChildren(projection, header, content, context, footer); return;
+    }
+    let selected = def.recordIds[0]!; let archive = this.hologramRecord(recordById(selected));
+    this.actions.recordViewed(selected);
+    const modes = node('nav', undefined, 'holo-modes'); modes.setAttribute('aria-label', `${def.title} modes`);
+    const archiveMode = button('Archive log', () => showMode('archive'), 'holo-mode'); archiveMode.id = `${id}-archive-mode`;
+    const restoreMode = button('Reconstruction', () => showMode('restore'), 'holo-mode'); restoreMode.id = `${id}-restore-mode`;
+    modes.append(archiveMode, restoreMode);
+    const records = this.archiveNavigation(def.recordIds, () => selected, (recordId) => {
+      selected = recordId; archive = this.hologramRecord(recordById(recordId)); this.actions.recordViewed(recordId); showMode('archive');
+    });
+    const showMode = (mode: 'archive' | 'restore'): void => {
+      panel.dataset.holoMode = mode; panel.dataset.holoRecord = selected;
+      archiveMode.setAttribute('aria-pressed', String(mode === 'archive')); restoreMode.setAttribute('aria-pressed', String(mode === 'restore'));
+      records.nav.hidden = mode !== 'archive'; records.refresh();
+      content.setAttribute('aria-labelledby', mode === 'archive' ? archiveMode.id : restoreMode.id);
+      if (mode === 'archive' && id === 'PZ-03') {
+        const combined = node('div', undefined, 'holo-archive-with-diagnostic'); combined.append(this.diagnostic(), archive); content.replaceChildren(combined);
+      } else content.replaceChildren(mode === 'archive' ? archive : reconstruction.form);
+      content.scrollTop = 0;
+      this.hintAction = () => { if (!reconstruction.isSolved()) { showMode('restore'); reconstruction.hint(); } };
+    };
+    panel.replaceChildren(projection, header, modes, records.nav, content, context, footer); showMode('archive');
   }
 
   /** Witness in Stone's optical projection is isolated from the other interfaces. */
@@ -395,7 +487,7 @@ export class GameUI {
     context.classList.add('holo-context');
     const footer = node('footer', undefined, 'holo-footer');
     const resume = button(TEXT.resume, () => this.actions.resume(), 'holo-return');
-    footer.append(node('span', 'FICTIONAL SHIP PROJECTION', 'holo-footer-note'), node('span', 'TAB focus · ENTER select · H hint · ESC pause', 'holo-key-legend'), resume);
+    footer.append(node('span', 'FICTIONAL SHIP PROJECTION', 'holo-footer-note'), node('span', 'TAB focus · ARROWS / SPACE choose · ENTER confirm · H hint · ESC pause', 'holo-key-legend'), resume);
     if (status === 'locked') {
       content.append(node('p', 'Restore the previous record first. Follow the objective in your HUD.', 'feedback'));
       panel.replaceChildren(projection, header, content, context, footer);
@@ -453,7 +545,10 @@ export class GameUI {
     }, 'holo-hint-button');
     const submit = node('button', def.confirmLabel, 'primary holo-submit'); submit.type = 'submit';
     const markSolved = (): void => {
-      for (const group of groups.values()) group.disabled = true;
+      for (const [key, group] of groups) {
+        group.disabled = true; group.removeAttribute('aria-invalid');
+        for (const radio of inputs.get(key) ?? []) radio.removeAttribute('aria-invalid');
+      }
       submit.remove(); hintButton.remove(); hint.textContent = '';
       this.hintAction = null;
       form.dataset.solved = 'true';
@@ -569,10 +664,12 @@ export class GameUI {
   }
 
   showRecord(id: string): void {
-    const r = recordById(id);
-    this.actions.recordViewed(id);
-    const p = this.show(r.title, r.layer);
-    p.append(this.record(r), button(TEXT.resume, () => this.actions.resume()), button('Journal', () => this.showJournal()));
+    const record = recordById(id); this.actions.recordViewed(id);
+    const { panel, projection, header, content, footer } = this.opticalFrame(record.title, record.layer, 'VØRAX / ARCHIVAL RECORD', 'record-hologram');
+    panel.classList.add('holo-record-panel'); panel.dataset.holoRecord = id;
+    content.append(this.hologramRecord(record));
+    footer.insertBefore(button('Journal', () => this.showJournal()), footer.lastElementChild);
+    panel.replaceChildren(projection, header, content, footer);
   }
 
   private unlockedRecords(): string[] {
@@ -582,30 +679,69 @@ export class GameUI {
 
   showJournal(): void {
     const state = this.actions.getState();
-    const p = this.show('Archive journal', 'RECORDS · MAP · HINTS');
-    p.append(node('p', project(state).objective), button(TEXT.resume, () => this.actions.resume(), 'primary'));
-    const map = node('pre', '                     NORTH\n              [ OBSERVATION DECK ]\n                       |\n                   [ OBSERVATION DECK ]\n                       |\n                   [ RELAY ]\n                       | D2\n[ INSIGHT ] — HUB — D1 [ OPPORTUNITY ]\n                       | D0\n                   [ AIRLOCK ]', 'map');
-    p.append(details('Archive map', map, node('p', 'D0 / D1: backup power · D2: both scientific records. Chapter I: Opportunity, east. Chapter II: InSight, west. The observation deck is north of the relay.')));
-    const records = node('section'); records.append(node('h2', 'Unlocked records'));
+    const { panel, projection, header, content, footer } = this.opticalFrame('Archive journal', 'RECORDS · MAP · HINTS', 'VØRAX / SURVIVOR JOURNAL', 'journal-hologram');
+    panel.classList.add('holo-journal');
     const ids = this.unlockedRecords();
-    if (!ids.length) records.append(node('p', 'Restore backup power to open the first mission records.'));
-    for (const r of RECORDS.filter((r) => ids.includes(r.id))) {
-      const d = details(r.title, this.record(r));
-      d.addEventListener('toggle', () => { if (d.open) this.actions.recordViewed(r.id); });
-      records.append(d);
-    }
-    p.append(records);
+    let selected = ids[0] ?? '';
+    let selectedView = selected ? this.hologramRecord(recordById(selected)) : null;
+    const mission = node('section', undefined, 'holo-journal-mission');
+    mission.setAttribute('aria-label', 'Mission information');
+    const missionText = node('div', undefined, 'holo-mission-text');
+    missionText.append(node('p', 'CURRENT OBJECTIVE', 'layer'), node('h2', project(state).objective), node('p', `${ids.length} archive records available. Scientific sources are kept separate from the ship log.`, 'note'));
+    const hints = node('section', undefined, 'holo-journal-hints'); hints.append(node('h3', 'Available guidance'));
     for (const puzzle of PUZZLES.filter((puzzle) => project(state).puzzles[puzzle.id] !== 'locked')) {
-      const hints = node('div');
-      for (const [i, hint] of puzzle.hints.entries()) hints.append(details(`Hint ${i + 1}`, node('p', hint)));
-      p.append(details(`${puzzle.title} — hints`, hints));
+      const entries = node('div'); for (const [index, hint] of puzzle.hints.entries()) entries.append(details(`Hint ${index + 1}`, node('p', hint)));
+      hints.append(details(`${puzzle.title} — hints`, entries));
     }
-    const logs = node('section'); logs.append(node('h2', 'Ship log — fictional evacuation and rescue'));
-    if(state.awakened)logs.append(node('p','FICTIONAL SHIP RECORD: evacuation completed while the survivor was unconscious after an impact. Find power and send a distress signal.'));
-    if(stageIndex(state.storyStage)>=stageIndex('OPPORTUNITY_RESTORED'))logs.append(node('p','FICTIONAL EVACUATION MANIFEST: medical sensor offline; occupancy reconciliation incomplete. One berth incorrectly marked empty. The crew did not know anyone remained.'));
-    if(stageIndex(state.storyStage)>=stageIndex('EPILOGUE'))logs.append(node('p','FICTIONAL RESCUE CHANNEL: Rescue One received the distress beacon. Reach the observation deck for visual confirmation.'));
-    for (const b of BEATS.filter((b) => state.seenBeatIds.includes(b.id))) logs.append(node('p', `${b.layer}: ${b.caption}`));
-    p.append(logs, this.credits());
+    missionText.append(hints);
+    mission.append(missionText, this.journalMap());
+    const logs = node('section', undefined, 'holo-ship-log'); logs.setAttribute('aria-label', 'Fictional ship log');
+    logs.append(node('p', 'FICTIONAL SHIP RECORDS', 'layer'), node('h2', 'Ship log — fictional evacuation and rescue'));
+    if (state.awakened) logs.append(node('p', 'FICTIONAL SHIP RECORD: evacuation completed while the survivor was unconscious after an impact. Find power and send a distress signal.'));
+    if (stageIndex(state.storyStage) >= stageIndex('OPPORTUNITY_RESTORED')) logs.append(node('p', 'FICTIONAL EVACUATION MANIFEST: medical sensor offline; occupancy reconciliation incomplete. One berth incorrectly marked empty. The crew did not know anyone remained.'));
+    if (stageIndex(state.storyStage) >= stageIndex('EPILOGUE')) logs.append(node('p', 'FICTIONAL RESCUE CHANNEL: Rescue One received the distress beacon. Reach the observation deck for visual confirmation.'));
+    for (const beat of BEATS.filter((beat) => state.seenBeatIds.includes(beat.id))) logs.append(node('p', `${beat.layer}: ${beat.caption}`));
+    logs.append(this.credits());
+    const modes = node('nav', undefined, 'holo-modes'); modes.setAttribute('aria-label', 'Journal sections');
+    const controls = new Map<string, HTMLButtonElement>();
+    for (const [id, label] of [['mission', 'Mission'], ['records', 'Records'], ['ship-log', 'Ship log']] as const) {
+      const control = button(label, () => showMode(id), 'holo-mode'); control.id = `journal-${id}-mode`; controls.set(id, control); modes.append(control);
+    }
+    const records = this.archiveNavigation(ids, () => selected, (id) => {
+      selected = id; selectedView = this.hologramRecord(recordById(id)); this.actions.recordViewed(id); showMode('records');
+    });
+    const empty = node('section', undefined, 'holo-empty-records');
+    empty.append(node('h2', 'Unlocked records'), node('p', 'Restore backup power to open the first mission records.'));
+    const showMode = (mode: 'mission' | 'records' | 'ship-log'): void => {
+      panel.dataset.journalMode = mode; panel.dataset.holoRecord = mode === 'records' ? selected : '';
+      for (const [id, control] of controls) control.setAttribute('aria-pressed', String(mode === id));
+      const active = controls.get(mode)!; content.setAttribute('aria-labelledby', active.id);
+      records.nav.hidden = mode !== 'records' || !ids.length; records.refresh();
+      content.replaceChildren(mode === 'mission' ? mission : mode === 'ship-log' ? logs : selectedView ?? empty);
+      content.scrollTop = 0;
+    };
+    panel.replaceChildren(projection, header, modes, records.nav, content, footer); showMode('mission');
+  }
+
+  /** Same authoritative rooms/connectors as the 3D scene, drawn as an original diagram. */
+  private journalMap(): HTMLElement {
+    const figure = node('figure', undefined, 'holo-station-map'); figure.setAttribute('aria-label', 'Archive map');
+    const location = this.zone.textContent || 'AIRLOCK';
+    const ns = 'http://www.w3.org/2000/svg'; const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', '-16 -32 32 42'); svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', `Fictional station map. Current location: ${location}. North is up.`);
+    for (const rect of RECTS) {
+      const shape = document.createElementNS(ns, 'rect');
+      shape.setAttribute('x', String(rect.x0)); shape.setAttribute('y', String(-rect.z1));
+      shape.setAttribute('width', String(rect.x1 - rect.x0)); shape.setAttribute('height', String(rect.z1 - rect.z0));
+      shape.setAttribute('class', rect.zone === location ? 'holo-map-current' : rect.kind === 'connector' ? 'holo-map-connector' : 'holo-map-room'); svg.append(shape);
+      if (rect.kind === 'room') {
+        const label = document.createElementNS(ns, 'text'); label.setAttribute('x', String((rect.x0 + rect.x1) / 2)); label.setAttribute('y', String(-(rect.z0 + rect.z1) / 2));
+        label.textContent = rect.zone; svg.append(label);
+      }
+    }
+    figure.append(svg, node('figcaption', 'FICTIONAL SHIP LAYOUT · NORTH ↑'), node('p', `Current location: ${location}`, 'holo-map-location'), node('p', 'D0 / D1: backup power · D2: both scientific records. Chapter I: Opportunity, east. Chapter II: InSight, west. The observation deck is north of the relay.', 'note'));
+    return figure;
   }
 
   private diagnostic(): HTMLElement {
@@ -664,7 +800,9 @@ export class GameUI {
     this.panel.dataset.sequence = current.title;
     this.panel.replaceChildren();
     const title = node('h1', current.title, 'chapter-title');
-    const body = node('div', undefined, 'cinematic-caption');
+    const channel = /RADIO|TRANSMISSION/.test(beat.speaker) ? 'radio' : /INTERNAL MONOLOGUE/.test(beat.speaker) ? 'thought' : /SOUND CAPTION/.test(beat.speaker) ? 'sound' : 'system';
+    this.panel.dataset.dialogueChannel = channel;
+    const body = node('div', undefined, `cinematic-caption dialogue-${channel}`);
     body.setAttribute('aria-live', 'polite');
     body.append(node('p', beat.speaker, 'layer'), node('p', beat.text, 'cinematic-line'));
     const actions = node('div', undefined, 'cinematic-actions');
@@ -672,7 +810,7 @@ export class GameUI {
     const skip = button('Skip sequence', () => this.skipCinematic());
     next.dataset.cinematicAction = 'continue'; skip.dataset.cinematicAction = 'skip';
     actions.append(next, skip);
-    this.panel.append(title, body, node('p', `${current.index + 1} / ${current.beats.length} · Fictional emergency and dialogue. NASA evidence remains in the archive.`, 'note'), actions);
+    this.panel.append(title, body, node('p', `${current.index + 1} / ${current.beats.length} · Fictional emergency and dialogue. NASA evidence remains in the archive.`, 'note cinematic-progress'), actions);
     // Replacing a focused button otherwise strands keyboard focus on <body>.
     if (retainedAction) (retainedAction === 'skip' ? skip : next).focus({ preventScroll: true });
     else if (retainedPanelFocus) this.panel.focus({ preventScroll: true });

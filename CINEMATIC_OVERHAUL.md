@@ -69,6 +69,16 @@ The result uses carefully bounded screen-space perspective rather than a world-a
 
 The user answered “Aprobar esta dirección” to the optical projection visual checkpoint. Approval covers continuation of this direction. Recovery checkpoint `42edfe0` preserves the approved PZ-02 implementation and executed checks. Continue the original sequential overhaul: extend Phase 3, test it, implement the white rescue finale, then integrated QA. Do not rebuild completed environments or change science/puzzle logic. The earlier STOP language above records the fulfilled checkpoint, not a continuing gate.
 
+## Phase 3 rollout — implemented and tested
+
+Continued from the approved prototype without restarting or regenerating art. The shared optical frame now serves PZ-00, PZ-01, PZ-03, standalone records and journal. PZ-02 retains its approved materials/layout. All puzzle choices are native radio cards with the original field/option IDs, submit labels, validators and prerequisites. The journal has Mission, Records and Ship log views, the original unlock guard, an original SVG of the authoritative RECTS layout and explicit fictional-map labels. Mission/location/recovery information uses a small transparent visor; narrative channels use readable lower-third thought/radio/system/sound framing. Utility menus retain native settings controls. Scientific content and image pixels are unchanged.
+
+Production baseline: 90/90 unit PASS; build/typecheck PASS; 17/17 full browser scenarios PASS (3.3 min), including real physical completion, original rescue/restart, journal unlocks, PIA25680 image/credit and SEIS source/sonification/usage. After narrow fixes for H focus, immediately visible solved explanations and clearing stale aria-invalid warnings, rebuilt and reran gameplay/interface scenarios: 4/4 PASS (1.7 min). Evidence: output/playwright/overhaul/phase3/{unit,build,build-final,e2e,targeted-final}.log.
+
+Actual Chrome CLI controls at 1280×720 / 150% text / OS reduced-motion only reached InSight and relay without stage injection. All seven rendered records matched every original field, editorial explanation, source URL, credit, usage condition and claim ID. Both terminals had 24 px scientific body text, no content horizontal overflow and no perspective/carrier/deploy motion. Sources, images and controls remained scrollable; H retained focus; incomplete provenance could not enable the beacon; correct classification displayed all original rationales. Evidence: phase3/{reach-insight,insight-relay-qa,relay-qa}.log and *.png. The stale-invalid result captured during this QA led to the correction verified by the final gameplay assertion. This is automated normal-input QA, not human comfort/duration acceptance.
+
+Read-only source-preservation audit compared live Blender with the master opened separately in background Blender: all compared mesh/UV/color, material, armature, animation, weight, object, light/world, pose/transform and sampled scene/image data matched. Live Blender still reports is_dirty=true for an undetermined reason; do not describe it as clean or overwrite it. No production source/GLB was modified or re-exported. Evidence: output/playwright/overhaul/sourcecheck/comparison.json.
+
 ## Phases 4–5
 
 White rescue finale and final integrated QA remain pending. No phase is marked complete from a design plan or a mockup.
