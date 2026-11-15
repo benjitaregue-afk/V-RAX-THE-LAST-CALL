@@ -1,8 +1,22 @@
 # ART HANDOFF — VØRAX
 
-Updated 2026-11-15 (America/La_Paz) after art revision **r3 — exterior depth**. Repository: `/Users/bketsui/Documents/ChatGPT/THE LAST SIGNAL`. Paths below are relative to this root. This records saved production work, not final artistic approval.
+Updated 2026-11-15 (America/La_Paz) after art revision **r4 — portal repair and authored hands**. Repository: `/Users/bketsui/Documents/ChatGPT/THE LAST SIGNAL`. Paths below are relative to this root. This records saved production work, not final artistic approval.
 
-## Current revision r3 — exterior depth delivered
+## Current revision r4 — approved first hands checkpoint
+
+Continue from the saved master and this checkout. Recovery commits: `fe7c70b` (complete r3 baseline), `20540cf` (portal repair). The user approved the first hand model/animation direction and continuation on 2026-11-15. See `CINEMATIC_OVERHAUL.md` for exact tests, evidence, file list and remaining phases.
+
+- Portal defect fixed in the existing geometry: four portals' steel trim/hazard bands offset 15 mm from coplanar structural faces, no topology/UV/material rebuild or room rebake. Source: `assets/blender/scripts/repair_portal_trim.py`; future generator dimensions corrected in `station_arch.py` without running build_station.py. Current environment GLB hash: `d5d2589b1177cc5457f6b81aaf1032b746e31dbdaaaffd338d2cf53b508eadd0`.
+- Current master: `assets/blender/vorax_station.blend`, r4 including a parked `FP_HANDS` collection, hidden from station rendering/baking. Versioned editable copy: `assets/blender/backups/vorax_station_r4_hands_checkpoint_20261115.blend`. The dedicated hand library `assets/blender/hands/vorax_hands_source.blend` can append FP_HANDS into another scene.
+- Production export: `public/assets/models/player-hands.glb` — 23,504 triangles, 35 bones, four materials, ten clips; hash `c17d52a85683ddfb21418eb98ab3ec7aa976ce3f9ed8fafb3c008ca7671b4ddc`. Original procedural maps, provenance and topology/camera audit in `assets/blender/hands/`. No reference images were shipped.
+- Runtime/source: `assets/blender/scripts/build_hands.py`, `audit_hand_camera.py`, `src/player/hands.ts`, `src/main.ts`, visual/provenance registries and new hand unit/browser tests. All science and gameplay guards unchanged. Prologue camera/clip synchronization changed for valid floor contact; mandatory interaction still has immediate E continuation and never waits on an animation callback.
+- Final Phase 2 validation: 90 unit tests, production build/typecheck, 15 browser tests PASS. Source/master reopened successfully. Human approved screenshots/demo. Hardware acceptance, Safari/Firefox, full human playthrough and comfort/contact review remain unverified.
+
+**Next:** first mission/Opportunity archive UI prototype, then show actual in-engine screenshot and verify readability for the second user visual checkpoint. Do not apply its design throughout the game until that approval. White rescue finale and integrated QA follow. Keep the completed r2/r3 station and Rescue One intact; never run build_station.py.
+
+## Historical r3 handoff
+
+## Revision r3 — exterior depth delivered
 
 This section supersedes r2 paths/status where they differ below. Codex continued the next art milestone through the real Blender MCP connection. Final artistic approval remains human/Claude-owned.
 

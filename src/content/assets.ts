@@ -37,7 +37,7 @@ export const MODEL_ASSETS: AssetRecord[] = [
     ...model(
     'environment',
     'Station shell and set dressing: six zones and observation exterior depth',
-    ['Exported from Blender as binary glTF 2.0, +Y up, textures embedded as WebP', TEXTURE_NOTE, `Observation deck window recomposed in revision r2 (${ENDING_PASS})`, 'Revision r3: exterior service boom, radiator and hull shoulder added through Blender MCP by Codex; 2,396 triangles, two materials, linked repeated meshes, tiled UVs and vertex paint. Source: assets/blender/scripts/station_exterior.py. Existing interior primitives and lightmaps preserved.'],
+    ['Exported from Blender as binary glTF 2.0, +Y up, textures embedded as WebP', TEXTURE_NOTE, `Observation deck window recomposed in revision r2 (${ENDING_PASS})`, 'Revision r3: exterior service boom, radiator and hull shoulder added through Blender MCP by Codex; 2,396 triangles, two materials, linked repeated meshes, tiled UVs and vertex paint. Source: assets/blender/scripts/station_exterior.py.', 'Revision r4: only existing portal trim and hazard bands moved 15 mm to separate coplanar structural faces; topology, materials, both UV layers and lightmaps preserved. Source: assets/blender/scripts/repair_portal_trim.py.'],
     'Greybox shell from the collision layout; the game stays fully playable without this file.',
   ),
     credit: `${ORIGINAL_CREDIT}; r3 exterior depth authored with Codex through Blender MCP`,
@@ -46,6 +46,14 @@ export const MODEL_ASSETS: AssetRecord[] = [
   model('arm', 'Ceiling maintenance arm (moving part)', ['Exported from Blender as binary glTF 2.0, +Y up'], 'Greybox box on the ceiling.'),
   model('fan', 'Ventilation fan blades', ['Exported from Blender as binary glTF 2.0, +Y up'], 'Greybox box on the wall.'),
   model('relay', 'Fictional relay core and rings (moving parts)', ['Exported from Blender as binary glTF 2.0, +Y up'], 'Greybox box at the relay position.'),
+  {
+    ...model('player-hands', 'Original articulated industrial survival gloves and forearms',
+      ['Original smooth anatomical loft geometry, woven textile maps and vertex paint; 23,504 triangles, four materials, a 35-bone deform rig and ten authored clips', 'Exported from Blender 5.3 as binary glTF 2.0 with skin weights, sampled joint animations and embedded WebP material maps; no external reference pixels or logos copied'],
+      'Procedural provisional viewmodel if the local GLB is unavailable.'),
+    sourceUrl: 'assets/blender/hands/vorax_hands_source.blend',
+    derivedFrom: 'assets/blender/scripts/build_hands.py',
+    credit: 'VØRAX team — original glove geometry, textures and animations authored with Codex through Blender MCP',
+  },
   {
     ...model(
       'rescue-one',

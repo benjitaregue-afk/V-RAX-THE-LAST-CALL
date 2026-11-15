@@ -1,0 +1,154 @@
+{
+  "creator": "Codex with Blender Python",
+  "source_script": "/Users/bketsui/Documents/ChatGPT/THE LAST SIGNAL/assets/blender/scripts/build_hands.py",
+  "source_blend": "/Users/bketsui/Documents/ChatGPT/THE LAST SIGNAL/assets/blender/hands/vorax_hands_source.blend",
+  "date": "2026-11-15",
+  "external_assets_copied": [],
+  "reference": "User-provided mano.webp; broad material/silhouette reference only, not reproduced",
+  "rights": "Original project artwork. Project licence remains a human decision.",
+  "transforms": [
+    "Original anatomical loft geometry",
+    "Original periodic twill and scuff maps",
+    "Localized original grime, low-density scratches and selected guard-edge wear",
+    "Deform armature with blended joint weights and independently anchored forearms",
+    "30 fps sampled eased animation"
+  ],
+  "audit": {
+    "triangles": 23504,
+    "materials": [
+      "MAT_FP_Accent",
+      "MAT_FP_Grip",
+      "MAT_FP_Guard",
+      "MAT_FP_Woven"
+    ],
+    "objects": [
+      {
+        "name": "SM_FP_Glove_L",
+        "triangles": 11752,
+        "vertices": 5970,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "degenerate_faces": 0,
+        "loose_vertices": 0,
+        "unweighted_vertices": 0,
+        "max_influences": 2,
+        "uv_layers": [
+          "UVMap"
+        ]
+      },
+      {
+        "name": "SM_FP_Glove_R",
+        "triangles": 11752,
+        "vertices": 5970,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "degenerate_faces": 0,
+        "loose_vertices": 0,
+        "unweighted_vertices": 0,
+        "max_influences": 2,
+        "uv_layers": [
+          "UVMap"
+        ]
+      }
+    ],
+    "issues": [],
+    "clips": {
+      "Awaken": {
+        "present": true,
+        "reference_seconds": 3.2,
+        "frame_range": [
+          0.0,
+          96.0
+        ]
+      },
+      "StandUp": {
+        "present": true,
+        "reference_seconds": 3.0,
+        "frame_range": [
+          0.0,
+          90.0
+        ]
+      },
+      "Idle": {
+        "present": true,
+        "reference_seconds": 1.8,
+        "frame_range": [
+          0.0,
+          54.0
+        ]
+      },
+      "Reach": {
+        "present": true,
+        "reference_seconds": 0.72,
+        "frame_range": [
+          0.0,
+          22.0
+        ]
+      },
+      "PressTerminal": {
+        "present": true,
+        "reference_seconds": 0.9,
+        "frame_range": [
+          0.0,
+          27.0
+        ]
+      },
+      "OperateSwitch": {
+        "present": true,
+        "reference_seconds": 1.1,
+        "frame_range": [
+          0.0,
+          33.0
+        ]
+      },
+      "OperateDoor": {
+        "present": true,
+        "reference_seconds": 0.8,
+        "frame_range": [
+          0.0,
+          24.0
+        ]
+      },
+      "Walk": {
+        "present": true,
+        "reference_seconds": 1.12,
+        "frame_range": [
+          0.0,
+          34.0
+        ]
+      },
+      "Sprint": {
+        "present": true,
+        "reference_seconds": 0.72,
+        "frame_range": [
+          0.0,
+          22.0
+        ]
+      },
+      "Inspect": {
+        "present": true,
+        "reference_seconds": 1.4,
+        "frame_range": [
+          0.0,
+          42.0
+        ]
+      }
+    },
+    "bones": 35,
+    "anatomy_metres": {
+      "palm_width": 0.092,
+      "finger_lengths": {
+        "index": 0.081,
+        "middle": 0.091,
+        "ring": 0.085,
+        "little": 0.068
+      },
+      "thumb_length": 0.075,
+      "thumb_has_three_joints": true,
+      "little_shorter_than_middle": true
+    },
+    "uv_note": "Intentional periodic textile UV overlap; unique atlas packing is inapplicable to tiling materials",
+    "lod_note": "Fixed-distance first-person viewmodel; no world-distance LOD is delivered",
+    "status": "PASS"
+  }
+}

@@ -105,3 +105,7 @@ Lanzamiento recomendado con cero bloqueantes/altas, evidencia de M13/M14 y P0 ce
 `ID | NOT RUN/PASS/FAIL/BLOCKED | fecha | build/commit | URL | SO/hardware/browser | pasos | observado | evidencia | incidencia/resolución`
 
 Los archivos de evidencia se crearán después de aprobación. En esta fase no existen logs, capturas ni resultados de ejecución del juego.
+
+## R4 executed visual checkpoint — 2026-11-15
+
+Executed results/evidence: CINEMATIC_OVERHAUL.md. Portal z-fighting was reproduced and compared across multiple angles; existing UV/material/topology counts were preserved by the physical repair. Authored hands passed geometry/weight/clip binary checks, deformed-floor checks, source-library reopening, real keyboard locomotion/gesture/pause/journal/reduced-intensity scenarios, and the original survivor-route/browser regression suite. User approved the first hand direction. Posed art captures and native canvas demo are explicitly separate from the accelerated normal-input gameplay route. Human comfort/contact/duration review, minimum hardware and Safari/Firefox remain NOT RUN. First mission/archive UI prototype must receive actual readability/keyboard verification and the second user visual approval before wider rollout; final white rescue ending and integrated acceptance still follow.

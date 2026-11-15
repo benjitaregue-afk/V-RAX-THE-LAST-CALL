@@ -2,6 +2,10 @@
 
 Updated 2026-11-14. Continue this checkout. **The current direction supersedes the former archive-loop ending.** Final meshes, materials, destruction, hand rig, recorded performances and cinematic polish remain Claude's responsibility. Codex has implemented the playable sequence using provisional geometry.
 
+## R4 continuation — 2026-11-15
+
+The user authorized and approved the first authored glove/animation direction. Current source/status: ART_HANDOFF.md and CINEMATIC_OVERHAUL.md. `player-hands.glb` now exists, with the seven original clips plus Walk (1.12 s), Sprint (.72 s) and Inspect (1.4 s). The source library can append `FP_HANDS`; master station also contains this parked, render-hidden collection. Runtime API adds `setMotion`, `setInteractionTarget` and `setClearance`, while preserving play/update/setVisible/loadAsset/dispose. Authored joint poses blend over .18 s on the paused game clock. Text panels and non-awakening dialogue hide hands. Prologue support uses the exact camera inverse, zero roll, and synchronized StandUp phase; no callback controls story completion. The portal trim z-fighting defect is physically repaired without rebuilding rooms. First mission/archive UI prototype is next, with user readability/visual approval before wider rollout.
+
 ## Launch / verify
 
 ```sh

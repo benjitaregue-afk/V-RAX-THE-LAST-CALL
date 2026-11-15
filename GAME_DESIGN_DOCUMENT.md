@@ -130,3 +130,7 @@ No hay medidor de cordura. Los recursos NASA no se corrompen visualmente ni mien
 ## Cambios de alcance
 
 Las respuestas, IDs, prerrequisitos y eventos anteriores son contratos compartidos con LEVEL_DESIGN, ARCHITECTURE y QA_PLAN. Cualquier recorte que cambie un acertijo o su condición de salida exige actualizar los cuatro y repetir la prueba completa. No se cambia la respuesta para acomodar un asset incorrecto.
+
+## R4 visual embodiment — 2026-11-15
+
+The first authored industrial glove model and animation direction were approved by the user. The viewmodel is visual only: ten authored clips with .18 s transitions, restrained locomotion, bounded target guidance and wall retraction. Text panels and non-awakening dialogue hide the hands. The prologue uses the measured floor-support camera with zero roll and synchronized hand/standing time. E can still finish an interaction immediately; no skinning or animation callback changes story progression. Puzzles, prerequisites, reach, save format and scientific sources are unchanged. Current production/QA status: CINEMATIC_OVERHAUL.md.

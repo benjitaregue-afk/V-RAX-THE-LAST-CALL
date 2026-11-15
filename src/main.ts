@@ -3,7 +3,7 @@ import {Engine,Scene,SpotLight,Vector3} from '@babylonjs/core';
 import {ArchiveWorld} from './world/world';
 import {readVisualManifest} from './world/visuals';
 import {Player} from './player/player';
-import {FirstPersonHands} from './player/hands';
+import {FirstPersonHands,HAND_DURATIONS} from './player/hands';
 import {GameUI} from './ui/ui';
 import {ArchiveAudio} from './audio/audio';
 import {ArchiveVoice} from './audio/voice';
@@ -28,21 +28,21 @@ const uiRoot=document.querySelector<HTMLElement>('#ui')!;
 const store=new SaveStore(browserStorage(),{recordIds:RECORD_IDS,beatIds:[...BEAT_IDS,'CHAPTER1','BEACON']});
 const loaded=store.load();let state=loaded.ok?loaded.state:initialState();let settings=store.loadSettings();
 let mode:Mode='MENU';let engine:Engine;let scene:Scene;let world:ArchiveWorld;let player:Player;let hands:FirstPersonHands;let flashlight:SpotLight;
-let flashOn=true;let last=performance.now();let elapsed=0;let capturing=false;let saveWarning=false;
+let flashOn=true;let last=performance.now();let elapsed=0;let capturing=false;let saveWarning=false;let handMotionHold=0;
 let focused:ReturnType<ArchiveWorld['focused']>=null;
 let sequence:Sequence|null=null;let cinematicClock=0;let cinematicSuspended=false;let standing=false;let metalTriggered=false;
-let pendingInteraction:(()=>void)|null=null;let interactionClock=0;
+let pendingInteraction:(()=>void)|null=null;let interactionClock=0;let interactionDuration=.7;
 let observationRadioPending=false;
 const audio=new ArchiveAudio();const voice=new ArchiveVoice();
 function save():void{if(!store.save(state)&&!saveWarning){saveWarning=true;ui.notify(TEXT.saveFailed);}}
 function updateProjection():void{const view=project(state);world?.sync(view);audio.setPreserved(!view.pulseActive);}
 function dispatch(event:GameEvent):boolean{const result=reduce(state,event);if(!result.accepted)return false;state=result.state;updateProjection();save();return true;}
-function stop(next:Mode):void{mode=next;player?.activate(false);audio.setPaused(true);voice.cancel();if(document.pointerLockElement===canvas)document.exitPointerLock();}
+function stop(next:Mode):void{mode=next;player?.activate(false);audio.setPaused(true);voice.cancel();if(next!=='CINEMATIC')hands?.setVisible(false);if(document.pointerLockElement===canvas)document.exitPointerLock();}
 function restoreView():void{uiRoot.style.setProperty('--recovery','1');uiRoot.style.setProperty('--chapter-title-opacity','1');player?.cinematicPose(1.65,0);world?.power(1);audio.cinematic('normal');hands?.play('Idle');}
 function pause(message?:string):void{pendingInteraction=null;stop('PAUSED');ui.showPause(message);}
 function play():void{
   if(settings.lookMode==='mouse'&&document.pointerLockElement!==canvas&&!navigator.userActivation.isActive){restoreView();pause('Continue when ready. Click Return to archive to take control, or use arrow keys to look.');return;}
-  sequence=null;restoreView();mode='PLAYING';ui.hide();player.activate(true);hands.setVisible(true);audio.setPaused(false);
+  sequence=null;restoreView();mode='PLAYING';ui.hide();player.activate(true);hands.setInteractionTarget(null);hands.setVisible(true);audio.setPaused(false);
   void audio.unlock().then(ok=>{
     if(!ok)ui.notify('Audio is unavailable. Captions and puzzles remain available.');
     if(mode==='PLAYING'&&observationRadioPending&&state.storyStage==='OBSERVATION'){
@@ -58,9 +58,9 @@ function speak(beat:SceneBeat):void{
   voice.speak(beat.text,settings.master*settings.effects);
 }
 function cinematic(id:Sequence,title:string,beats:SceneBeat[],done:()=>void):void{
-  stop('CINEMATIC');sequence=id;cinematicClock=0;standing=false;metalTriggered=false;cinematicSuspended=false;uiRoot.style.setProperty('--chapter-title-opacity',id==='chapterTwo'?'0':'1');hands.setVisible(id!=='fade');audio.setPaused(false);
+  stop('CINEMATIC');sequence=id;cinematicClock=0;standing=false;metalTriggered=false;cinematicSuspended=false;uiRoot.style.setProperty('--chapter-title-opacity',id==='chapterTwo'?'0':'1');hands.setInteractionTarget(null);hands.setVisible(id==='awakening');audio.setPaused(false);
   void audio.unlock().then(()=>audio.cinematic(sequence===id&&mode==='CINEMATIC'?(id==='awakening'?'awakening':id==='chapterTwo'?'chapter':'normal'):'normal')); 
-  if(id==='awakening'){hands.play('Awaken');player.cinematicPose(.24,.9,-.1);uiRoot.style.setProperty('--recovery','0');}
+  if(id==='awakening'){hands.play('Awaken');player.cinematicPose(.24,.9);uiRoot.style.setProperty('--recovery','0');}
   else uiRoot.style.setProperty('--recovery','1');
   ui.showCinematic(title,beats,()=>{voice.cancel();restoreView();done();},speak);
 }
@@ -106,7 +106,11 @@ const ui=new GameUI(uiRoot,{
   keepExploring:()=>ui.showComplete(),recordViewed:id=>{dispatch({type:'recordViewed',recordId:id});},
 });
 function interact():void{
-  if(!focused)return;const item=focused;hands.play(item.kind==='door'?'OperateDoor':item.id==='switch'?'OperateSwitch':item.kind==='puzzle'?'PressTerminal':'Reach');
+  if(!focused)return;const item=focused;
+  const hit=scene.pickWithRay(player.camera.getForwardRay(2.2),m=>!!m.metadata?.blocksInteraction);
+  hands.setInteractionTarget(hit?.pickedPoint??null);
+  const gesture=item.kind==='door'?'OperateDoor':item.id==='switch'?'OperateSwitch':item.kind==='puzzle'?'PressTerminal':'Inspect';
+  hands.play(gesture);interactionDuration=HAND_DURATIONS[gesture]*.78;
   mode='INTERACTING';player.activate(false);interactionClock=0;
   pendingInteraction=()=>{
     pendingInteraction=null;audio.effect('click');
@@ -119,6 +123,8 @@ async function boot():Promise<void>{
   const problems=validateContent();if(problems.length)throw new Error(problems.join('; '));if(!Engine.IsSupported)throw new Error(TEXT.unsupported);
   engine=new Engine(canvas,true,{preserveDrawingBuffer:false,stencil:true});if(engine.webGLVersion<2)throw new Error(TEXT.unsupported);
   scene=new Scene(engine);world=new ArchiveWorld(scene);player=new Player(canvas,scene,settings);hands=new FirstPersonHands(player.camera,scene);
+  // Development art review only; production QA still follows normal controls/UI.
+  if(import.meta.env.DEV)(window as unknown as Record<string,unknown>).__voraxHands={hands,player,scene};
   hands.setVisible(false);player.teleport(project(state).checkpoint);
   flashlight=new SpotLight('PROVISIONAL-flashlight',player.position.clone(),new Vector3(0,0,1),.9,3,scene);flashlight.range=12;flashlight.intensity=2;
   world.configure(settings);audio.configure(settings);updateProjection();
@@ -143,16 +149,18 @@ async function boot():Promise<void>{
   engine.onContextLostObservable.add(()=>{save();fatal('Graphics context lost. Reload to try the last stored checkpoint.');});
   engine.runRenderLoop(()=>{
     try{
-      const now=performance.now();const dt=Math.min((now-last)/1000,.1);last=now;elapsed+=dt;
+      const now=performance.now();const dt=Math.min((now-last)/1000,.1);last=now;elapsed+=dt;let handStep=dt;
       const moving=player.update(dt);const pos=player.position;
-      if(mode==='INTERACTING'){interactionClock+=dt;if(interactionClock>=.35)pendingInteraction?.();}
+      if(mode==='INTERACTING'){interactionClock+=dt;if(interactionClock>=interactionDuration)pendingInteraction?.();}
       if(mode==='CINEMATIC'&&!cinematicSuspended){
         cinematicClock+=dt;
         if(sequence==='awakening'){
-          if(cinematicClock>=3.2&&!standing){standing=true;hands.play('StandUp');}
+          if(cinematicClock>=3.2&&!standing){standing=true;hands.play('StandUp');handStep=cinematicClock-3.2;}
           const rise=Math.min(1,Math.max(0,(cinematicClock-3.2)/3));
-          player.cinematicPose(.24+1.41*rise,.9*(1-rise),settings.reducedIntensity?0:-.1*(1-rise));
-          uiRoot.style.setProperty('--recovery',String(Math.min(1,cinematicClock/4)));
+          // Match the authored support camera exactly; hand inertia supplies motion.
+          player.cinematicPose(.24+1.41*rise,.9*(1-rise));
+          const reveal=Math.max(0,Math.min(1,(cinematicClock-.25)/1.25));
+          uiRoot.style.setProperty('--recovery',String(reveal*reveal*(3-2*reveal)));
         }else if(sequence==='chapterTwo'){
           if(cinematicClock>=2.5&&!metalTriggered){metalTriggered=true;audio.effect('metal');}
           uiRoot.style.setProperty('--chapter-title-opacity',cinematicClock>=5.5?'1':'0');
@@ -161,7 +169,12 @@ async function boot():Promise<void>{
         }else if(sequence==='fade')uiRoot.style.setProperty('--recovery',String(Math.max(0,1-cinematicClock/1.4)));
         ui.updateCinematic(cinematicClock);
       }
-      hands.update(cinematicSuspended?0:dt);
+      // Render frames without a fixed physics step must not reset the authored walk clip.
+      handMotionHold=mode==='PLAYING'?(moving ? 0.1 : Math.max(0,handMotionHold-dt)):0;
+      hands.setMotion(handMotionHold>0?(player.sprinting?3.2:1.8):0,player.sprinting,settings.reducedIntensity);
+      const clearance=mode==='PLAYING'?scene.pickWithRay(player.camera.getForwardRay(.9),m=>!!m.metadata?.blocksInteraction):null;
+      hands.setClearance(clearance?.hit?clearance.distance:Infinity);
+      hands.update(cinematicSuspended||!['PLAYING','INTERACTING','CINEMATIC'].includes(mode)?0:handStep);
       if(!rectAt(pos.x,pos.z,.1)){player.teleport(project(state).checkpoint);ui.notify(TEXT.outOfBounds);console.error('Unexpected out-of-bounds position recovered');}
       const zone=world.update(pos.x,pos.z,elapsed,settings.reducedIntensity);
       world.rescue.update(mode==='CINEMATIC'&&!cinematicSuspended?dt:0,pos);
@@ -174,7 +187,7 @@ async function boot():Promise<void>{
       }
       canvas.dataset.x=pos.x.toFixed(4);canvas.dataset.z=pos.z.toFixed(4);canvas.dataset.yaw=player.camera.rotation.y.toFixed(4);canvas.dataset.pitch=player.camera.rotation.x.toFixed(4);
       canvas.dataset.stage=state.storyStage;canvas.dataset.mode=mode;canvas.dataset.flashlight=String(flashOn);canvas.dataset.fps=engine.getFps().toFixed(1);canvas.dataset.meshes=String(scene.meshes.length);canvas.dataset.triangles=String(scene.getActiveIndices()/3);
-      canvas.dataset.cinematic=sequence??'';canvas.dataset.handAnimation=hands.animationName;canvas.dataset.eyeHeight=pos.y.toFixed(3);canvas.dataset.sprinting=String(player.sprinting);
+      canvas.dataset.cinematic=sequence??'';canvas.dataset.handAnimation=hands.animationName;canvas.dataset.handAsset=String(hands.usingProductionAsset);canvas.dataset.handBlend=hands.blendProgress.toFixed(3);canvas.dataset.eyeHeight=pos.y.toFixed(3);canvas.dataset.sprinting=String(player.sprinting);
       canvas.dataset.rescueVisible=String(world.rescue.active);canvas.dataset.rescueZ=world.rescue.ship.position.z.toFixed(3);canvas.dataset.searchlight=String(world.rescue.searchlight.intensity>0);canvas.dataset.searchlightDirectionZ=world.rescue.searchlight.direction.z.toFixed(3);canvas.dataset.speech=voice.status;canvas.dataset.spokenLines=String(voice.spokenLines);canvas.dataset.speechError=voice.lastError;
       scene.render();
     }catch(error){console.error(error);engine.stopRenderLoop();fatal('The spacecraft stopped unexpectedly. Reload to try the last checkpoint.');}

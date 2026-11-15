@@ -22,10 +22,23 @@ Files: assets/blender/scripts/{station_arch,repair_portal_trim}.py, assets/blend
 
 Evidence: output/playwright/overhaul/phase1_before/ and phase1_after/, jamb_inner / jamb_inner_oblique / jamb_inner_near.png. Actual Babylon.js dev scene, headless Chrome, 1280×720, INSIGHT profile, flashlight on, posed camera, no game progression claim. Observation: previously unstable patches are gone, steel/hazard trims remain detailed and stable. npm test: 85/85 PASS; npm run build (includes typecheck): PASS; assets:hash: 27 files. Automated camera posing is not a human playthrough or laptop performance acceptance.
 
-## Phase 2 — in production
+## Phase 2 — implemented and visually approved
 
-First original glove model, rig, authored animation set and first-person integration are in production. Visual review must use actual in-engine camera captures before extending this system. Detailed runtime geometry/animation claims are recorded only after export and verification.
+User approved the first actual in-engine glove model and animation direction on 2026-11-15, answering “Aprobar y continuar” at the requested visual checkpoint. Approval covers this direction; further comfort/hardware review remains human work.
+
+Original fully covered graphite work gloves with articulated unequal fingers, opposed thumbs, dorsal guards, glove seams, cuff equipment and weathered woven sleeves. Pair: 23,504 triangles, 35 bones, four shared materials, three original 1024² material maps. Maximum two skin influences per vertex; no unweighted vertices, open/non-manifold edges or degenerate faces. Source: assets/blender/scripts/build_hands.py; editable hands-only library: assets/blender/hands/vorax_hands_source.blend (append FP_HANDS); the open master also contains the parked, render-hidden FP_HANDS collection. Ten actual joint-animated GLB clips: Awaken, StandUp, Idle, Reach, PressTerminal, OperateSwitch, OperateDoor, Walk, Sprint, Inspect. Fixed-distance viewmodel, no world-distance LOD. No external reference pixels/meshes/branding were copied.
+
+Runtime samples authored joint TRS on the game clock with 0.18 s quaternion/TRS blends, independent paused timing, restrained breathing/walking/sprint, bounded camera-local interaction direction and near-wall lowering. Sleeve rig now aims from anchored elbows and follows wrist supination roll, fixing floating endcaps and twisted cloth observed in the first iteration. Blender's exported white sheen was removed after identifying its incorrect glTF factor; graphite colour, woven normals, localized grime, scratches and guard-edge wear remain. Two camera-local lights affect only the hands. Text interfaces, pause and narrative dialogue hide the hands; awakening deliberately shows them.
+
+Prologue choreography uses the actual camera inverse for planted support, measured finger clearance through both turn arcs, zero camera roll, and an exactly synchronized StandUp clock. Reveal now finishes with the raised-palm gesture. Deformed geometry sampled at authored frame times clears the floor: minimum Awaken 0.0002 m, StandUp 0.00348 m; assets/blender/hands/camera-audit.json records all samples. This is geometric verification, not a human comfort test.
+
+Delivery: public/assets/models/player-hands.glb, 1,525,964 bytes, SHA-256 c17d52a85683ddfb21418eb98ab3ec7aa976ce3f9ed8fafb3c008ca7671b4ddc. Registry and visual manifest include only the real export. Both master and standalone library reopened in background Blender with all ten clips/35 bones and no missing images.
+
+Executed final checks: npm test 90/90 PASS, npm run build/typecheck PASS, final npm run test:e2e 15/15 PASS in headless Chrome (3.0 min; output/playwright/overhaul/final-e2e.log). New real-input scenarios cover authored wake/stand, walk/sprint/idle, pause freezing, resume, switch anticipation, journal/source readability and reduced intensity. Binary tests check actual skin weights/joints and time-varying channels for all clips. Existing full survivor route reaches rescue/THE END and checks restart. This is an accelerated automated route, not a human first playthrough.
+
+Evidence: output/playwright/overhaul/hands/ (posed in-engine clip review), hands-gameplay/ (normal controls/UI screenshots), hands-demo/first-person-hands.webm (native canvas recording of actual first-person play; no external encoding dependency). Camera-only capture excludes HTML overlays; real UI screenshots are separate. Original twelve regression scenarios also passed before the last presentation tuning; final fifteen include that tuning.
+
 
 ## Phases 3–5
 
-Interface rollout, white rescue finale and final whole-game QA remain pending. No phase is marked complete from a design plan or a mockup.
+Phase 3 first mission/Opportunity archive prototype is authorized after the approved hands checkpoint and passing Phase 2 checks. A second in-engine readability/visual approval is required before wider interface rollout. White rescue finale and final integrated QA remain pending. No phase is marked complete from a design plan or a mockup.

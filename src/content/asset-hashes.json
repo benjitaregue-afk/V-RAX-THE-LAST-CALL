@@ -91,6 +91,10 @@
     "sha256": "51a5ee04e75c7f16ea5d69fe6c190c13ef638a6bdbafa67a82679122f3065cc7",
     "bytes": 16980
   },
+  "assets/models/player-hands.glb": {
+    "sha256": "c17d52a85683ddfb21418eb98ab3ec7aa976ce3f9ed8fafb3c008ca7671b4ddc",
+    "bytes": 1525964
+  },
   "assets/models/relay.glb": {
     "sha256": "fb289f37836d3155e8d6a92ed75842f9c2c781ffa682ea9e1e29d4ffdb33031b",
     "bytes": 73760

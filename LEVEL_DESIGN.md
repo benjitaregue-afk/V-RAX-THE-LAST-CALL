@@ -89,3 +89,7 @@ El tiempo se apoya en exploración, lectura y razonamiento, no en la longitud de
 ## Inspección requerida en P1/P3
 
 Caminar contra todas las paredes, esquinas y marcos; probar movimiento diagonal, baja tasa de cuadros, pérdida de foco, entradas a terminal y carga desde cada checkpoint. Capturar planta y vista del jugador a altura real. Un diagrama revisado no demuestra que la colisión implementada funcione.
+
+## R4 art integration — 2026-11-15
+
+At D0/D1/D2/ARCH_W, existing steel/hazard trim now stands 15mm toward the opening and the header trim 15mm below its structural face, eliminating coplanar depth competition. No room, connector, collider, interactable stand point or gameplay coordinate changed. Hands use camera-local authored poses and bounded directional guidance; their render meshes do not participate in level collision or picking. The existing camera/contact envelope remains the authority.

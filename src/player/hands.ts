@@ -1,16 +1,16 @@
-// Temporary first-person embodiment, not final production art. Claude can replace this
-// viewmodel with an animated GLB without changing interactions or story progression.
+// Authored first-person embodiment. Imported joint animation stays visual-only;
+// a missing model keeps the original procedural recovery path playable.
 import {
-  AnimationGroup, AssetContainer, Camera, Color3, MeshBuilder, Scene,
+  Animation, AnimationGroup, AssetContainer, Camera, Color3, InstancedMesh, MeshBuilder, PBRMaterial, PointLight, Quaternion, Scene,
   StandardMaterial, TransformNode, Vector3,
 } from '@babylonjs/core';
 
-export const HAND_ANIMATIONS = ['Awaken', 'StandUp', 'Idle', 'Reach', 'PressTerminal', 'OperateSwitch', 'OperateDoor'] as const;
+export const HAND_ANIMATIONS = ['Awaken', 'StandUp', 'Idle', 'Reach', 'PressTerminal', 'OperateSwitch', 'OperateDoor', 'Walk', 'Sprint', 'Inspect'] as const;
 export type HandAnimation = (typeof HAND_ANIMATIONS)[number];
 export const HAND_ASSET_PATH = 'assets/models/player-hands.glb';
 /** Seconds. Clip completion is only visual: no gameplay event depends on it. */
 export const HAND_DURATIONS: Readonly<Record<HandAnimation, number>> = Object.freeze({
-  Awaken: 3.2, StandUp: 3, Idle: 1.8, Reach: 0.72, PressTerminal: 0.9, OperateSwitch: 1.1, OperateDoor: 0.8,
+  Awaken: 3.2, StandUp: 3, Idle: 1.8, Reach: 0.72, PressTerminal: 0.9, OperateSwitch: 1.1, OperateDoor: 0.8, Walk: 1.12, Sprint: 0.72, Inspect: 1.4,
 });
 
 type Triple = readonly [number, number, number];
@@ -29,7 +29,7 @@ const idle: FirstPersonPose = {
 };
 const frame = (at: number, left: HandPose, right: HandPose): KeyPose => ({ at, left, right });
 const pose = (position: Triple, rotation: Triple, curl = 0.2): HandPose => ({ position, rotation, curl });
-const CLIPS: Readonly<Record<Exclude<HandAnimation, 'Idle'>, readonly KeyPose[]>> = {
+const CLIPS: Readonly<Record<Exclude<HandAnimation, 'Idle' | 'Walk' | 'Sprint'>, readonly KeyPose[]>> = {
   // The raised right palm enters the dark view first; the left finds support below it.
   Awaken: [
     frame(0, pose([-0.27, -0.62, 0.42], [0.55, -0.25, -0.55], 0.5), pose([0.24, -0.58, 0.4], [0.5, 0.3, 0.4], 0.5)),
@@ -43,6 +43,13 @@ const CLIPS: Readonly<Record<Exclude<HandAnimation, 'Idle'>, readonly KeyPose[]>
     frame(0, pose([-0.28, -0.09, 0.7], [1.3, -0.05, -0.1], 0), pose([0.26, -0.08, 0.65], [0.75, 0.2, 0.14], 0.08)),
     frame(0.28, pose([-0.3, -0.08, 0.7], [1.45, 0, -0.1], 0), pose([0.3, -0.07, 0.7], [1.4, 0, 0.1], 0)),
     frame(0.63, pose([-0.32, -0.19, 0.6], [0.65, -0.2, -0.2], 0.12), pose([0.32, -0.18, 0.6], [0.65, 0.2, 0.2], 0.12)),
+    frame(1, idle.left, idle.right),
+  ],
+  Inspect: [
+    frame(0, idle.left, idle.right),
+    frame(0.18, idle.left, pose([0.26, -0.34, 0.45], [-0.16, 0.22, 0.16], 0.3)),
+    frame(0.5, idle.left, pose([0.13, -0.12, 0.66], [0.18, -0.2, -0.12], 0.12)),
+    frame(0.72, idle.left, pose([0.13, -0.12, 0.66], [0.22, -0.1, 0.02], 0.15)),
     frame(1, idle.left, idle.right),
   ],
   Reach: [
@@ -83,8 +90,9 @@ function blendHand(a: HandPose, b: HandPose, t: number): HandPose {
 /** Pure pose sampler: normalized clip time is deterministic and safe at its boundaries. */
 export function sampleHandPose(name: HandAnimation, seconds: number): FirstPersonPose {
   const time = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
-  if (name === 'Idle') {
-    const lift = Math.sin(time / HAND_DURATIONS.Idle * Math.PI * 2) * 0.004;
+  if (isLoop(name)) {
+    const phase = time / HAND_DURATIONS[name] * Math.PI * 2;
+    const lift = Math.sin(phase) * (name === 'Sprint' ? 0.019 : name === 'Walk' ? 0.009 : 0.004);
     return {
       left: { ...idle.left, position: [idle.left.position[0], idle.left.position[1] + lift, idle.left.position[2]] },
       right: { ...idle.right, position: [idle.right.position[0], idle.right.position[1] - lift, idle.right.position[2]] },
@@ -104,6 +112,39 @@ export function sampleHandPose(name: HandAnimation, seconds: number): FirstPerso
 /** Deliberately a single local path; viewmodel assets may not load remote scripts/URLs. */
 export function isHandAssetPath(path: unknown): path is typeof HAND_ASSET_PATH { return path === HAND_ASSET_PATH; }
 
+
+type LoopAnimation = 'Idle' | 'Walk' | 'Sprint';
+function isLoop(name: HandAnimation): name is LoopAnimation { return name === 'Idle' || name === 'Walk' || name === 'Sprint'; }
+const isInteraction = (name: HandAnimation): boolean => ['Reach', 'PressTerminal', 'OperateSwitch', 'OperateDoor', 'Inspect'].includes(name);
+const clamp = (n: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, n));
+/** Smooth endpoint velocity for authored-pose crossfades. */
+export function handBlendWeight(elapsed: number, duration = 0.18): number {
+  const t = clamp(Number.isFinite(elapsed) ? elapsed / duration : 0, 0, 1);
+  return t * t * (3 - 2 * t);
+}
+/** Small camera-space guidance; an interaction never stretches an arm to a remote target. */
+export function handTargetBias(local: Vector3 | null, envelope: number): { position: Vector3; rotation: Vector3 } {
+  if (!local || ![local.x, local.y, local.z].every(Number.isFinite) || local.z <= 0.05) return { position: Vector3.Zero(), rotation: Vector3.Zero() };
+  const w = clamp(envelope, 0, 1);
+  return {
+    position: new Vector3(clamp(local.x * 0.08, -0.07, 0.07) * w, clamp(local.y * 0.08, -0.05, 0.05) * w, clamp((local.z - 0.75) * 0.025, -0.015, 0.035) * w),
+    rotation: new Vector3(clamp(-Math.atan2(local.y, local.z) * 0.24, -0.13, 0.13) * w, clamp(Math.atan2(local.x, local.z) * 0.28, -0.18, 0.18) * w, 0),
+  };
+}
+
+type PoseValue = number | Vector3 | Quaternion;
+interface Channel { target: Record<string, unknown>; property: string; rest: PoseValue }
+interface Track { channel: Channel; animation: Animation }
+type AuthoredPose = Map<Channel, PoseValue>;
+interface Transition { name: HandAnimation; group: AnimationGroup | null; elapsed: number; clock: number; fallback: FirstPersonPose }
+const copyValue = (value: PoseValue): PoseValue => typeof value === 'number' ? value : value.clone();
+function blendValue(a: PoseValue, b: PoseValue, t: number): PoseValue {
+  if (typeof a === 'number' && typeof b === 'number') return mix(a, b, t);
+  if (a instanceof Quaternion && b instanceof Quaternion) return Quaternion.Slerp(a, b, t);
+  if (a instanceof Vector3 && b instanceof Vector3) return Vector3.Lerp(a, b, t);
+  return copyValue(b);
+}
+
 export class FirstPersonHands {
   readonly root: TransformNode;
   private readonly greyRoot: TransformNode;
@@ -115,15 +156,28 @@ export class FirstPersonHands {
   private elapsed = 0;
   private groups: AnimationGroup[] = [];
   private activeGroup: AnimationGroup | null = null;
+  private channels: Channel[] = [];
+  private tracks = new Map<AnimationGroup, Track[]>();
+  private transition: Transition | null = null;
+  private fallbackPose = sampleHandPose('Idle', 0);
+  private locomotion: LoopAnimation = 'Idle';
+  private reduced = false;
+  private motionAmount = 1;
+  private target: Vector3 | null = null;
+  private clearance = Infinity;
+  private nearWall = 0;
   private container: AssetContainer | null = null;
   private disposed = false;
   private loadSerial = 0;
   private assetReady = false;
+  private handLights: PointLight[] = [];
+  private litMeshes: import('@babylonjs/core').AbstractMesh[] = [];
+  private removeLightObserver: () => void = () => {};
 
-  constructor(camera: Camera, private readonly scene: Scene) {
+  constructor(private readonly camera: Camera, private readonly scene: Scene) {
     this.root = new TransformNode('fp-hands-root', scene);
     this.root.parent = camera;
-    this.root.metadata = { provisional: true, assetPath: null, animation: 'Idle' };
+    this.root.metadata = { provisional: true, assetPath: null, animation: 'Idle', blend: 1 };
     this.greyRoot = new TransformNode('fp-hands-greybox', scene); this.greyRoot.parent = this.root;
     this.assetRoot = new TransformNode('fp-hands-production', scene); this.assetRoot.parent = this.root;
     this.assetRoot.setEnabled(false);
@@ -133,12 +187,16 @@ export class FirstPersonHands {
     this.material.specularColor.setAll(0.04);
     scene.setRenderingAutoClearDepthStencil(2, true, true, true);
     for (const side of [-1, 1]) this.buildHand(side);
-    this.applyPose(sampleHandPose('Idle', 0));
+    this.applyPose(this.fallbackPose);
+    const observer = scene.onNewLightAddedObservable.add((light) => {
+      if (!light.name.startsWith('fp-hands-') && this.litMeshes.length) light.excludedMeshes.push(...this.litMeshes);
+    });
+    this.removeLightObserver = () => { scene.onNewLightAddedObservable.remove(observer); };
   }
 
   get animationName(): HandAnimation { return this.animation; }
   get usingProductionAsset(): boolean { return this.assetRoot.isEnabled() && this.assetReady; }
-
+  get blendProgress(): number { return this.transition ? handBlendWeight(this.transition.clock) : 1; }
   private buildHand(side: number): void {
     const sideName = side < 0 ? 'L' : 'R';
     const palm = new TransformNode(`hand_${sideName}`, this.scene); palm.parent = this.greyRoot;
@@ -164,31 +222,98 @@ export class FirstPersonHands {
     this.fingers.push(fingers);
   }
 
-  play(name: HandAnimation): void {
+  setMotion(speed: number, sprinting: boolean, reduced: boolean): void {
     if (this.disposed) return;
+    this.reduced = reduced;
+    const moving = Number.isFinite(speed) && speed > (this.locomotion === 'Idle' ? 0.15 : 0.08);
+    const desired: LoopAnimation = moving ? sprinting ? 'Sprint' : 'Walk' : 'Idle';
+    this.locomotion = desired;
+    if (isLoop(this.animation) && desired !== this.animation) this.play(desired);
+  }
+
+  setClearance(distance: number): void {
+    this.clearance = Number.isFinite(distance) ? Math.max(0, distance) : Infinity;
+  }
+
+  setInteractionTarget(worldTarget: Vector3 | null): void {
+    if (this.disposed) return;
+    this.target = worldTarget ? Vector3.TransformCoordinates(worldTarget, this.camera.getViewMatrix()) : null;
+  }
+
+  play(name: HandAnimation): void {
+    if (this.disposed || (name === this.animation && isLoop(name))) return;
+    this.transition = { name: this.animation, group: this.activeGroup, elapsed: this.elapsed, clock: 0, fallback: this.fallbackPose };
     this.animation = name; this.elapsed = 0; this.root.metadata.animation = name;
-    for (const group of this.groups) group.stop(true);
     this.activeGroup = this.groups.find((group) => group.name === name) ?? null;
-    const production = this.assetReady && (this.activeGroup !== null || name === 'Idle');
-    this.assetRoot.setEnabled(production); this.greyRoot.setEnabled(!production);
-    if (this.activeGroup) {
-      // Sample through update(), so pausing the game also freezes the viewmodel.
-      this.activeGroup.start(name === 'Idle', 1); this.activeGroup.pause();
-      this.activeGroup.goToFrame(this.activeGroup.from);
+    // An incomplete optional export uses its closest authored gesture, preserving the rig.
+    if (this.assetReady && !this.activeGroup) this.activeGroup = this.groups.find((g) => g.name === (name === 'Inspect' ? 'Reach' : 'Idle')) ?? null;
+    this.assetRoot.setEnabled(this.assetReady); this.greyRoot.setEnabled(!this.assetReady);
+    this.root.metadata.blend = 0;
+    this.sampleAndApply(0);
+  }
+
+  private sampleGroup(group: AnimationGroup | null, name: HandAnimation, elapsed: number): AuthoredPose {
+    const values: AuthoredPose = new Map();
+    if (!group) return values;
+    const duration = HAND_DURATIONS[name];
+    const progress = isLoop(name) ? (elapsed % duration) / duration : clamp(elapsed / duration, 0, 1);
+    const at = group.from + (group.to - group.from) * progress;
+    for (const { channel, animation } of this.tracks.get(group) ?? []) {
+      const value: unknown = animation.evaluate(at);
+      if (typeof value === 'number' || value instanceof Vector3 || value instanceof Quaternion) values.set(channel, value);
     }
-    this.applyPose(sampleHandPose(name, 0));
+    return values;
+  }
+
+  private sampleAndApply(dt: number): void {
+    const incoming = this.sampleGroup(this.activeGroup, this.animation, this.elapsed);
+    // Reduced-intensity locomotion keeps the authored rhythm with a smaller excursion.
+    const amountGoal = this.reduced ? 0.35 : 1;
+    this.motionAmount += (amountGoal - this.motionAmount) * (1 - Math.exp(-dt * 10));
+    if (this.animation === 'Walk' || this.animation === 'Sprint') {
+      const idleGroup = this.groups.find((g) => g.name === 'Idle') ?? null;
+      const resting = this.sampleGroup(idleGroup, 'Idle', this.elapsed);
+      for (const channel of this.channels) incoming.set(channel, blendValue(resting.get(channel) ?? channel.rest, incoming.get(channel) ?? channel.rest, this.motionAmount));
+    }
+    let fallback = sampleHandPose(this.animation, this.elapsed);
+    const weight = this.transition ? handBlendWeight(this.transition.clock) : 1;
+    const outgoing = this.transition ? this.sampleGroup(this.transition.group, this.transition.name, this.transition.elapsed) : null;
+    for (const channel of this.channels) {
+      const b = incoming.get(channel) ?? channel.rest;
+      const a = outgoing?.get(channel) ?? channel.rest;
+      const value = outgoing ? blendValue(a, b, weight) : b;
+      const current = channel.target[channel.property];
+      if (current instanceof Vector3 && value instanceof Vector3) current.copyFrom(value);
+      else if (current instanceof Quaternion && value instanceof Quaternion) current.copyFrom(value);
+      else channel.target[channel.property] = copyValue(value);
+    }
+    if (this.transition) {
+      fallback = { left: blendHand(this.transition.fallback.left, fallback.left, weight), right: blendHand(this.transition.fallback.right, fallback.right, weight) };
+    }
+    this.fallbackPose = fallback;
+    this.applyPose(fallback);
+    const envelope = isInteraction(this.animation) ? Math.sin(Math.PI * clamp(this.elapsed / HAND_DURATIONS[this.animation], 0, 1)) : 0;
+    const bias = handTargetBias(this.target, envelope);
+    const wallGoal = isLoop(this.animation) ? clamp((0.75 - this.clearance) / 0.45, 0, 1) : 0;
+    this.nearWall += (wallGoal - this.nearWall) * (1 - Math.exp(-dt * 12));
+    bias.position.y -= this.nearWall * 0.15;
+    bias.position.z -= this.nearWall * 0.32;
+    this.assetRoot.position.copyFrom(bias.position); this.assetRoot.rotation.copyFrom(bias.rotation);
+    this.greyRoot.position.copyFrom(bias.position); this.greyRoot.rotation.copyFrom(bias.rotation);
+    this.root.metadata.nearWall = this.nearWall;
+    this.root.metadata.blend = weight;
+    this.root.metadata.contextOffset = bias.position.asArray();
   }
 
   update(dt: number): void {
     if (this.disposed) return;
-    if (Number.isFinite(dt) && dt > 0) this.elapsed += Math.min(dt, 0.25);
+    const step = Number.isFinite(dt) && dt > 0 ? Math.min(dt, 0.1) : 0;
+    this.elapsed += step;
+    if (this.transition) { this.transition.clock += step; this.transition.elapsed += step; }
     const duration = HAND_DURATIONS[this.animation];
-    if (this.animation !== 'Idle' && this.elapsed >= duration) { this.play('Idle'); return; }
-    this.applyPose(sampleHandPose(this.animation, this.elapsed));
-    if (this.activeGroup) {
-      const progress = this.animation === 'Idle' ? (this.elapsed % duration) / duration : Math.min(1, this.elapsed / duration);
-      this.activeGroup.goToFrame(this.activeGroup.from + (this.activeGroup.to - this.activeGroup.from) * progress);
-    }
+    if (!isLoop(this.animation) && this.elapsed >= duration) { this.play(this.locomotion); this.target = null; }
+    this.sampleAndApply(step);
+    if (this.transition && this.transition.clock >= 0.18) this.transition = null;
   }
 
   private applyPose(value: FirstPersonPose): void {
@@ -196,13 +321,59 @@ export class FirstPersonHands {
       this.palms[index]!.position.copyFrom(Vector3.FromArray(hand.position));
       this.palms[index]!.rotation.copyFrom(Vector3.FromArray(hand.rotation));
       this.fingers[index]!.forEach((joint, finger) => {
-        // Leave the index finger extended while pressing a console.
         joint.rotation.x = this.animation === 'PressTerminal' && index === 1 && finger === 1 ? 0 : hand.curl * 0.95;
       });
     });
   }
 
-  setVisible(visible: boolean): void { if (!this.disposed) this.root.setEnabled(visible); }
+  setVisible(visible: boolean): void {
+    if (this.disposed) return;
+    this.root.setEnabled(visible);
+    for (const light of this.handLights) light.setEnabled(visible && this.assetReady);
+  }
+
+  private prepareChannels(): void {
+    this.channels = []; this.tracks.clear();
+    const channels = new Map<object, Map<string, Channel>>();
+    for (const group of this.groups) {
+      group.stop(true);
+      const tracks: Track[] = [];
+      for (const { animation, target } of group.targetedAnimations) {
+        // glTF skeleton channels animate local TRS on the joint's transform node.
+        const property = animation.targetProperty;
+        if (!['position', 'rotationQuaternion', 'scaling', 'rotation'].includes(property)) continue;
+        const object = target as Record<string, unknown>;
+        const value = object[property];
+        if (!(value instanceof Vector3) && !(value instanceof Quaternion) && typeof value !== 'number') continue;
+        let properties = channels.get(object);
+        if (!properties) { properties = new Map(); channels.set(object, properties); }
+        let channel = properties.get(property);
+        if (!channel) { channel = { target: object, property, rest: copyValue(value) }; properties.set(property, channel); this.channels.push(channel); }
+        tracks.push({ channel, animation });
+      }
+      this.tracks.set(group, tracks);
+    }
+  }
+
+  private prepareLighting(): void {
+    for (const light of this.handLights) light.dispose();
+    const meshes = this.assetRoot.getChildMeshes();
+    this.litMeshes = [...new Set(meshes.flatMap((mesh) => mesh instanceof InstancedMesh ? [mesh, mesh.sourceMesh] : [mesh]))];
+    for (const mesh of this.litMeshes) {
+      mesh.applyFog = false;
+      if (mesh.material instanceof PBRMaterial) {
+        mesh.material.usePhysicalLightFalloff = false;
+        mesh.material.maxSimultaneousLights = 2;
+      }
+    }
+    for (const light of this.scene.lights) light.excludedMeshes.push(...this.litMeshes);
+    const key = new PointLight('fp-hands-key', new Vector3(0.25, 0.18, 0.18), this.scene);
+    key.parent = this.camera; key.intensity = 6; key.range = 2; key.diffuse = new Color3(0.88, 0.93, 1); key.renderPriority = 100;
+    const fill = new PointLight('fp-hands-fill', new Vector3(-0.3, -0.05, 0.15), this.scene);
+    fill.parent = this.camera; fill.intensity = 1.2; fill.range = 2; fill.diffuse = new Color3(1, 0.78, 0.56); fill.renderPriority = 99;
+    this.handLights = [key, fill];
+    for (const light of this.handLights) { light.includedOnlyMeshes = this.litMeshes; light.setEnabled(this.root.isEnabled()); }
+  }
 
   async loadAsset(path?: string): Promise<void> {
     if (path === undefined || this.disposed) return;
@@ -223,14 +394,20 @@ export class FirstPersonHands {
       mesh.metadata = { ...mesh.metadata, firstPersonViewmodel: true };
     }
     this.groups = instance.animationGroups;
+    this.prepareChannels(); this.prepareLighting();
     this.assetReady = true;
     this.root.metadata.assetPath = path; this.root.metadata.provisional = false;
-    this.play(this.animation);
+    this.activeGroup = this.groups.find((g) => g.name === this.animation) ?? this.groups.find((g) => g.name === 'Idle') ?? null;
+    this.transition = null;
+    this.assetRoot.setEnabled(true); this.greyRoot.setEnabled(false);
+    this.sampleAndApply(0);
   }
 
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true; ++this.loadSerial;
+    this.removeLightObserver();
+    for (const light of this.handLights) light.dispose();
     for (const group of this.groups) group.dispose();
     this.root.dispose(); this.container?.dispose(); this.material.dispose();
   }

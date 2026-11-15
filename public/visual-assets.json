@@ -14,5 +14,6 @@
   "rib": "assets/models/empty.glb",
   "crate": "assets/models/empty.glb",
   "tray": "assets/models/empty.glb",
-  "rescue": "assets/models/rescue-one.glb"
+  "rescue": "assets/models/rescue-one.glb",
+  "hands": "assets/models/player-hands.glb"
 }

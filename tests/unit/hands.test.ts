@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { NullEngine, Scene, UniversalCamera, Vector3 } from '@babylonjs/core';
-import { FirstPersonHands, HAND_ANIMATIONS, HAND_ASSET_PATH, HAND_DURATIONS, isHandAssetPath, sampleHandPose } from '../../src/player/hands';
+import { FirstPersonHands, HAND_ANIMATIONS, HAND_ASSET_PATH, HAND_DURATIONS, handBlendWeight, handTargetBias, isHandAssetPath, sampleHandPose } from '../../src/player/hands';
 
 describe('replaceable first-person hand contract', () => {
   it('attaches non-colliding viewmodels to the camera and restores Idle without gating gameplay', () => {
@@ -32,8 +32,9 @@ describe('replaceable first-person hand contract', () => {
     } finally { hands.dispose(); scene.dispose(); engine.dispose(); }
   });
 
-  it('has the seven agreed clips and finite visual durations', () => {
-    expect(HAND_ANIMATIONS).toEqual(['Awaken', 'StandUp', 'Idle', 'Reach', 'PressTerminal', 'OperateSwitch', 'OperateDoor']);
+  it('keeps the seven agreed clips and adds authored locomotion/inspection durations', () => {
+    expect(HAND_ANIMATIONS.slice(0, 7)).toEqual(['Awaken', 'StandUp', 'Idle', 'Reach', 'PressTerminal', 'OperateSwitch', 'OperateDoor']);
+    expect(HAND_ANIMATIONS.slice(7)).toEqual(['Walk', 'Sprint', 'Inspect']);
     for (const name of HAND_ANIMATIONS) expect(HAND_DURATIONS[name]).toBeGreaterThan(0);
     expect(HAND_DURATIONS.Awaken).toBeGreaterThanOrEqual(3);
     expect(HAND_DURATIONS.StandUp).toBeGreaterThanOrEqual(3);
@@ -63,6 +64,60 @@ describe('replaceable first-person hand contract', () => {
     expect(pressed.right.position[2] - rest.right.position[2]).toBeGreaterThan(0.25);
     expect(returned).toEqual(rest);
     expect(sampleHandPose('StandUp', HAND_DURATIONS.StandUp)).toEqual(rest);
+  });
+
+  it('eases transitions, keeps contextual reach bounded, and rejects targets behind the camera', () => {
+    expect(handBlendWeight(0)).toBe(0);
+    expect(handBlendWeight(0.09)).toBeCloseTo(0.5);
+    expect(handBlendWeight(0.18)).toBe(1);
+    expect(handBlendWeight(NaN)).toBe(0);
+    const far = handTargetBias(new Vector3(200, 100, 20), 1);
+    expect(far.position.x).toBeCloseTo(0.07);
+    expect(far.position.y).toBeCloseTo(0.05);
+    expect(far.position.z).toBeCloseTo(0.035);
+    expect(far.rotation.y).toBeLessThanOrEqual(0.18);
+    expect(handTargetBias(new Vector3(1, 1, -1), 1).position.length()).toBe(0);
+    expect(handTargetBias(new Vector3(1, 1, 1), 0).position.length()).toBe(0);
+  });
+
+  it('changes locomotion smoothly without interrupting gestures or advancing on pause', () => {
+    const engine = new NullEngine(); const scene = new Scene(engine);
+    const camera = new UniversalCamera('camera', Vector3.Zero(), scene);
+    const hands = new FirstPersonHands(camera, scene);
+    try {
+      hands.setMotion(1.8, false, false);
+      expect(hands.animationName).toBe('Walk');
+      expect(hands.blendProgress).toBe(0);
+      hands.update(0.09);
+      const halfway = hands.blendProgress;
+      hands.update(0);
+      expect(hands.blendProgress).toBe(halfway);
+      hands.setMotion(3.2, true, false);
+      expect(hands.animationName).toBe('Sprint');
+      hands.play('PressTerminal');
+      hands.setMotion(0, false, true);
+      expect(hands.animationName).toBe('PressTerminal');
+      for (let i = 0; i < 65; i++) hands.update(1 / 60);
+      expect(hands.animationName).toBe('Idle');
+      hands.play('Awaken'); hands.setMotion(0, false, true);
+      expect(hands.animationName).toBe('Awaken');
+    } finally { hands.dispose(); scene.dispose(); engine.dispose(); }
+  });
+
+  it('retracts near walls gradually and eases back after clearance returns', () => {
+    const engine = new NullEngine(); const scene = new Scene(engine);
+    const hands = new FirstPersonHands(new UniversalCamera('camera', Vector3.Zero(), scene), scene);
+    try {
+      hands.setClearance(0.3);
+      hands.update(1 / 60);
+      const first = hands.root.metadata.nearWall as number;
+      expect(first).toBeGreaterThan(0); expect(first).toBeLessThan(1);
+      for (let i = 0; i < 30; i++) hands.update(1 / 60);
+      expect(hands.root.metadata.nearWall).toBeGreaterThan(0.9);
+      hands.setClearance(Infinity);
+      for (let i = 0; i < 30; i++) hands.update(1 / 60);
+      expect(hands.root.metadata.nearWall).toBeLessThan(0.1);
+    } finally { hands.dispose(); scene.dispose(); engine.dispose(); }
   });
 
   it('clamps invalid clip times to finite poses and accepts only the local rig path', () => {

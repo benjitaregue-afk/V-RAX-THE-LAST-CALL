@@ -135,3 +135,7 @@ Scripts previstos: `typecheck`, `test`, `validate:content`, `build`, `preview`, 
 Host estático HTTPS, una ruta principal sin routing complejo, base path documentado. Archivos con hash de Vite pueden cachearse; HTML debe permitir recibir una versión nueva. No service worker en el núcleo para evitar builds antiguos. No secretos o claves en bundle.
 
 Ante WebGL/context loss: pausar, conservar estado disponible y ofrecer recarga/checkpoint con mensaje. Ante falta de soporte: mostrar requisitos, referencias y demo si existe; eso no se cuenta como haber entregado el juego 3D solicitado. El build de producción no contiene mutadores de estado de QA ni inspector.
+
+## R4 viewmodel implementation — 2026-11-15
+
+`FirstPersonHands` loads the local `assets/models/player-hands.glb`, preserves the seven original clip names and adds Walk1.12s, Sprint.72s and Inspect1.4s. `setMotion`, `setInteractionTarget` and `setClearance` supply presentation inputs. Joint TRS channels sample on the game clock and blend with quaternion interpolation; pausing freezes both sampling and transition time. Source/instance meshes receive two restricted camera-local lights and no cabin fog. Gameplay keeps input, collision, interaction proxies and reducer authority; render meshes remain non-colliding/non-pickable. Prologue support uses the same camera trajectory and time phase as the authored clip. Delivery and validation are in CINEMATIC_OVERHAUL.md.
